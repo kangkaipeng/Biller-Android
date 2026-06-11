@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    账单编辑/详情对话框布局 (v5 — 双模式控件体系)
+
+    模块: feature/biller/ui/dialog
+    用途: BottomSheetDialogFragment 的内容布局。支持两种视觉模式:
+            · 浏览模式 — 只读 TextView 展示，无边框，层次清晰
+            · 编辑模式 — TextInputLayout OutlinedBox 输入，标准表单
+
+    双模式控件体系:
+      每个可编辑字段有两套控件共存于布局——浏览用 DisplayView，编辑用 EditView。
+      模式切换时通过 visibility (VISIBLE/GONE) 控制显示/隐藏，而非 isEnabled 切换。
+      始终只读的字段（时间、分类）仅保留 DisplayView，无对应的 EditView。
+-->
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- ═══════════ 标题 — 浏览/编辑模式动态切换 ═══════════ -->
+        <TextView
+            android:id="@+id/tv_dialog_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="账单详情"
+            android:textAppearance="?attr/textAppearanceHeadlineSmall"
+            android:textColor="?attr/colorOnSurface"
+            android:layout_marginBottom="20dp"
+            tools:text="账单详情" />
+
+        <!-- ═══════════ 金额 + 商户名（浏览）— 核心数据同行展示 ═══════════ -->
+        <LinearLayout
+            android:id="@+id/layout_amount_display"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="?attr/colorSurfaceContainerLow"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="14dp"
+            android:layout_marginBottom="12dp"
+            android:visibility="visible">
+
+            <TextView
+                android:id="@+id/tv_amount_currency"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="¥"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="?attr/colorPrimary"
+                android:layout_marginEnd="4dp" />
+
+            <TextView
+                android:id="@+id/tv_amount_display"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:text="0.00"
+                android:textAppearance="?attr/textAppearanceHeadlineMedium"
+                android:textColor="?attr/colorPrimary"
+                android:fontFamily="sans-serif-medium"
+                tools:text="19.93" />
+
+            <!-- 商户名 — 同行右侧，视觉权重略低于金额 -->
+            <TextView
+                android:id="@+id/tv_amount_merchant"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="—"
+                android:textAppearance="?attr/textAppearanceBodyLarge"
+                android:textColor="?attr/colorOnSurface"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:gravity="end"
+                android:layout_marginStart="12dp"
+                tools:text="喜乐街奶茶店" />
+
+        </LinearLayout>
+
+        <!-- 金额（编辑）— 浏览模式下隐藏 -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_amount"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="金额 (元)"
+            android:layout_marginBottom="12dp"
+            android:visibility="gone"
+            app:prefixText="¥ ">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_amount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal"
+                android:maxLines="1"
+                tools:text="19.93" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- ═══════════ 商户名（浏览）— BodyLarge ═══════════ -->
+        <LinearLayout
+            android:id="@+id/layout_merchant_display"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="10dp"
+            android:visibility="visible">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="商户名"
+                android:textAppearance="?attr/textAppearanceLabelSmall"
+                android:textColor="?attr/colorOutline" />
+
+            <TextView
+                android:id="@+id/tv_merchant_display"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="—"
+                android:textAppearance="?attr/textAppearanceBodyLarge"
+                android:textColor="?attr/colorOnSurface"
+                android:layout_marginTop="2dp"
+                tools:text="Cavalry98（**朋）" />
+
+            <TextView
+                android:id="@+id/tv_merchant_origin_hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="原始商户: —"
+                android:textAppearance="?attr/textAppearanceBodySmall"
+                android:textColor="?attr/colorOutline"
+                android:visibility="gone"
+                tools:text="原始商户: Cavalry98(**朋)"
+                tools:visibility="visible" />
+
+        </LinearLayout>
+
+        <!-- 商户别名（编辑）— 浏览模式下隐藏 -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_merchant"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="商户别名"
+            android:layout_marginBottom="12dp"
+            android:visibility="gone">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_merchant"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:maxLines="1"
+                tools:text="Cavalry98" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- ═══════════ 交易时间 — 始终只读 ═══════════ -->
+        <LinearLayout
+            android:id="@+id/layout_time_display"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="交易时间"
+                android:textAppearance="?attr/textAppearanceLabelSmall"
+                android:textColor="?attr/colorOutline" />
+
+            <TextView
+                android:id="@+id/tv_time_display"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="—"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?attr/colorOnSurface"
+                android:fontFamily="sans-serif"
+                android:layout_marginTop="2dp"
+                tools:text="2026-06-09 13:25:30" />
+
+        </LinearLayout>
+
+        <!-- ═══════════ 消费分类 — 始终只读（Chip 风格） ═══════════ -->
+        <LinearLayout
+            android:id="@+id/layout_category_display"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="消费分类"
+                android:textAppearance="?attr/textAppearanceLabelSmall"
+                android:textColor="?attr/colorOutline" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_category"
+                style="@style/Widget.Material3.Chip.Suggestion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="未分类"
+                android:clickable="false"
+                android:checkable="false"
+                tools:text="🍔 餐饮" />
+
+        </LinearLayout>
+
+        <!-- ═══════════ 交易流水号（浏览）— BodyMedium ═══════════ -->
+        <LinearLayout
+            android:id="@+id/layout_txn_id_display"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="10dp"
+            android:visibility="visible">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="交易流水号"
+                android:textAppearance="?attr/textAppearanceLabelSmall"
+                android:textColor="?attr/colorOutline" />
+
+            <TextView
+                android:id="@+id/tv_txn_id_display"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="—"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?attr/colorOnSurface"
+                android:layout_marginTop="2dp"
+                tools:text="4200002564202606091234567890" />
+
+        </LinearLayout>
+
+        <!-- 交易流水号（编辑）— 浏览模式下隐藏 -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_transaction_id"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="交易流水号"
+            android:layout_marginBottom="12dp"
+            android:visibility="gone">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_transaction_id"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:maxLines="1"
+                tools:text="4200002564202606091234567890" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- ═══════════ 备注（浏览）— null 时整行隐藏 ═══════════ -->
+        <LinearLayout
+            android:id="@+id/layout_note_display"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="10dp"
+            android:visibility="visible">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="备注"
+                android:textAppearance="?attr/textAppearanceLabelSmall"
+                android:textColor="?attr/colorOutline" />
+
+            <TextView
+                android:id="@+id/tv_note_display"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="—"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?attr/colorOnSurface"
+                android:layout_marginTop="2dp"
+                tools:text="午餐外卖" />
+
+        </LinearLayout>
+
+        <!-- 备注（编辑）— 浏览模式下隐藏 -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_note"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="备注"
+            android:layout_marginBottom="20dp"
+            android:visibility="gone">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_note"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:maxLines="3"
+                tools:text="午餐外卖" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 消费分类编辑 (v5.1) — 仅编辑模式可见 -->
+        <LinearLayout
+            android:id="@+id/layout_category_edit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="消费分类"
+                android:textAppearance="?attr/textAppearanceLabelSmall"
+                android:textColor="?attr/colorOutline"
+                android:layout_marginBottom="6dp" />
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chip_group_category_edit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:singleSelection="true"
+                app:selectionRequired="false" />
+        </LinearLayout>
+
+        <!-- ═══════════ 按钮行 ═══════════ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <!-- 浏览模式：编辑按钮 -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_edit"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="2"
+                android:layout_marginEnd="8dp"
+                android:text="编辑"
+                app:cornerRadius="12dp"
+                android:visibility="visible" />
+
+            <!-- 编辑模式：保存按钮 -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_save"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="2"
+                android:layout_marginEnd="8dp"
+                android:visibility="gone"
+                android:text="保存"
+                app:cornerRadius="12dp"
+                tools:visibility="visible" />
+
+            <!-- 编辑模式：取消按钮 -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_cancel"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:visibility="gone"
+                android:text="取消"
+                app:cornerRadius="12dp"
+                tools:visibility="visible" />
+
+            <!-- 浏览模式：删除按钮 -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_delete"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="删除"
+                android:textColor="?attr/colorError"
+                app:strokeColor="?attr/colorError"
+                app:cornerRadius="12dp"
+                android:visibility="visible" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

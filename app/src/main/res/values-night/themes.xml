@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Biller 模块暗黑模式主题 (P4-4.3 新增)
+
+    模块: feature/biller/ui
+    职责: 强制日/夜模式主题覆盖，确保暗黑模式下使用 Material 3 Dark 主题体系。
+          配合 values-night/colors.xml 的状态指示色调整，实现完整的暗黑体验。
+
+    变更说明:
+      - 原项目仅配置了 values-night/colors.xml，缺少 themes.xml
+      - 暗黑模式下使用 Theme.Material3.Dark.NoActionBar 父主题，
+        自动启用 ?attr/colorSurface / ?attr/colorOnSurface 等暗黑语义色
+-->
+<resources>
+    <style name="Theme.BillerApplication" parent="Theme.Material3.Dark.NoActionBar" />
+</resources>

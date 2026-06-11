@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    FileProvider 路径白名单 (v5.2)
+    模块: feature/biller
+    用途: 控制 content:// URI 可访问的文件系统路径范围
+
+    v5.2 变更: 新增 files-path "logs" — 支持日志 ZIP 导出时
+              通过 FileProvider 访问 filesDir/logs/ 目录下的文件
+-->
+<paths>
+    <cache-path name="export" path="/" />
+    <!-- v5.2: 日志文件导出 — 覆盖 filesDir/logs/ 下的 .log 和 .zip 文件 -->
+    <files-path name="logs" path="logs/" />
+</paths>

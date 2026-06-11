@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Biller App 启动图标 — 背景层 (v2)
+
+    深海蓝渐变背景：
+      - 外层深色底 #0F172A
+      - 内层蓝色面板 #0F4C75
+      - 中心蓝色光晕（低透明度圆形）营造深度感
+
+    用法:
+      res/drawable/ic_launcher_background.xml
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- 底色 — 深海军蓝 -->
+    <path
+        android:fillColor="#0F172A"
+        android:pathData="M0,0 L108,0 L108,108 L0,108 Z" />
+
+    <!-- 内层圆角面板 — 深蓝 -->
+    <path
+        android:fillColor="#1E3A5F"
+        android:pathData="
+            M16,92
+            L16,16
+            Q16,12 20,12
+            L88,12
+            Q92,12 92,16
+            L92,92
+            Q92,96 88,96
+            L20,96
+            Q16,96 16,92 Z" />
+
+    <!-- 中心光晕 — 低透明蓝色圆形，营造空间感 -->
+    <path
+        android:fillColor="#1D6FA4"
+        android:pathData="
+            M54,54
+            m-28,0
+            a28,28 0 1,0 56,0
+            a28,28 0 1,0 -56,0 Z"
+        android:alpha="0.35" />
+
+</vector>

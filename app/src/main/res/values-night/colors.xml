@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Biller 模块颜色资源 — 深色主题变体
+    模块: feature/biller/ui
+    职责: 深色模式下提升亮度和饱合度，保证状态指示点的 WCAG 对比度。
+-->
+<resources>
+    <!-- 服务状态指示色 — 深色主题（略亮以保持对比度） -->
+    <color name="status_connected">#66BB6A</color>
+    <color name="status_disconnected">#EF5350</color>
+
+    <!-- 分类 chip：蓝色系 -->
+    <color name="chip_category_bg">#E6F1FB</color>
+    <color name="chip_category_text">#0C447C</color>
+
+    <!-- 渠道 chip：绿色系 -->
+    <color name="chip_channel_bg">#E1F5EE</color>
+    <color name="chip_channel_text">#085041</color>
+</resources>

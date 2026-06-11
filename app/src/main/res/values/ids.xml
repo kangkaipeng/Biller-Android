@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    旧版 BillerTestActivity 遗留的 View ID
+    模块: feature/biller/ui
+    职责: 保留 SettingsFragment 所需的 ID 引用，避免编译错误。
+         新架构 (BillDashboardActivity) 中这些 ID 对应的 View 已不存在，
+         SettingsFragment 使用 null-safe 操作符 (?.）优雅降级。
+-->
+<resources>
+    <item name="fragment_container_settings" type="id" />
+    <item name="layout_main_content" type="id" />
+</resources>

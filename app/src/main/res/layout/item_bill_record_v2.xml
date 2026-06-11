@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    账单条目卡片布局 (v5)
+
+    模块: feature/biller/ui
+    用途: RecyclerView 中每条账单记录的卡片展示。
+
+    视觉层次:
+      第一行: [emoji] 商户名称 ············ 金额
+      第二行: [分类chip] ······ [渠道chip] 时间
+      第三行(条件): 备注（灰色小字）
+
+    设计:
+      - MaterialCardView 外框，圆角 12dp，微阴影
+      - emoji 分类图标 + 商户名作为主视觉锚点
+      - 金额右对齐，使用 LabelLarge 字体突出
+      - 分类标签 / 渠道标签统一使用胶囊形 TextView chip，适配深色模式
+      - 分类标签左对齐，渠道标签紧靠时间左侧
+      - 备注仅在非空时显示
+
+    变更记录 (v5):
+      - 移除 Material Chip，改用统一 TextView chip 方案
+      - tv_category_label: 圆角改为 99dp 胶囊形，颜色改为主题色属性
+      - 新增 tv_payment_channel (TextView)，替代原 chip_payment_channel
+      - tv_payment_channel 移至右侧，紧靠 tv_time 左边
+-->
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="4dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="1dp"
+    app:cardBackgroundColor="?attr/colorSurface"
+    app:strokeWidth="0dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- ═══════════ 第一行: emoji + 商户名 + 金额 ═══════════ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+<!--            &lt;!&ndash; 分类 emoji 图标 &ndash;&gt;-->
+<!--            <TextView-->
+<!--                android:id="@+id/tv_category_emoji"-->
+<!--                android:layout_width="28dp"-->
+<!--                android:layout_height="28dp"-->
+<!--                android:gravity="center"-->
+<!--                android:textSize="16sp"-->
+<!--                android:layout_marginEnd="8dp"-->
+<!--                android:text="🍔"-->
+<!--                android:visibility="gone"-->
+<!--                tools:visibility="visible" />-->
+
+            <!-- 商户名称（别名 > 原始名 > "未知商户"） -->
+            <TextView
+                android:id="@+id/tv_merchant"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="16sp"
+                android:textAppearance="?attr/textAppearanceBodyLarge"
+                android:textColor="?attr/colorOnSurface"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:text="喜乐街奶茶店" />
+
+            <!-- 金额右对齐 -->
+            <TextView
+                android:id="@+id/tv_amount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:textAppearance="?attr/textAppearanceLabelLarge"
+                android:textColor="?attr/colorOnSurface"
+                android:text="¥11.01"
+                android:layout_marginStart="8dp" />
+
+        </LinearLayout>
+
+        <!-- ═══════════ 第二行: 备注（条件显示） ═══════════ -->
+        <TextView
+            android:id="@+id/tv_note"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:paddingStart="9dp"
+            android:textColor="?attr/colorOutline"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_marginTop="8dp"
+            android:visibility="gone"
+            android:text="午餐"
+            tools:visibility="visible" />
+
+        <!-- ═══════════ 第三行: 分类标签 + 弹性空间 + 渠道标签 + 时间 ═══════════ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+
+            <!-- 分类标签（条件显示，左对齐） -->
+            <TextView
+                android:id="@+id/tv_category_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_chip_category"
+                android:paddingHorizontal="9dp"
+                android:paddingVertical="3dp"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:textColor="@color/chip_category_text"
+                android:text="餐饮"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <!-- 弹性空间，撑开中间 -->
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <!-- 支付渠道标签（条件显示，紧靠时间左侧） -->
+            <TextView
+                android:id="@+id/tv_payment_channel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_chip_channel"
+                android:paddingHorizontal="9dp"
+                android:paddingVertical="3dp"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:textColor="@color/chip_channel_text"
+                android:layout_marginEnd="6dp"
+                android:text="微信"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <!-- 时间（等宽字体，最右侧） -->
+            <TextView
+                android:id="@+id/tv_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="11sp"
+                android:textColor="?attr/colorOutline"
+                android:fontFamily="monospace"
+                android:text="13:25" />
+
+        </LinearLayout>
+
+
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

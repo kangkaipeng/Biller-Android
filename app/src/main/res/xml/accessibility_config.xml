@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    无障碍服务配置
+
+    模块: feature/biller
+    职责: 定义 BillerAccessibilityService 的监听策略
+
+    配置说明:
+      - accessibilityEventTypes: 监听窗口内容变化和状态变化两类事件
+          typeWindowContentChanged: 页面文字内容变化（支付金额显示时触发）
+          typeWindowStateChanged:   页面切换（进入/退出支付成功页时触发）
+      - accessibilityFeedbackType: feedbackGeneric = 不提供语音反馈。
+          微信白名单机制依赖包名匹配（screenreader 关键字），而非此 flag，
+          因此无需使用 feedbackSpoken 带来的语音噪音。
+      - accessibilityFlags:
+          flagRequestTouchExplorationMode = 模仿 TalkBack 行为标志位，
+          辅助支付宝等其他 App 将本服务识别为屏幕朗读器以暴露节点树。
+          flagIncludeNotImportantViews = 必须，否则 WebView 内部节点不暴露。
+          flagRetrieveInteractiveWindows = 获取悬浮窗等交互窗口。
+      - notificationTimeout: 通知超时时间，100ms 足够
+      - canRetrieveWindowContent: 必须启用，否则 rootInActiveWindow 返回 null，
+        无法获取页面节点树进行文本提取
+      - packageNames: 留空 = 监听所有应用（过滤逻辑在 Kotlin 代码中实现，
+        比 XML 配置更灵活，支持动态添加目标包名）
+
+    开发者注意:
+      - 此文件在 Manifest 中通过 android:resource="@xml/accessibility_config" 引用
+      - 修改此文件后需重新安装 App 并重新授权无障碍服务
+-->
+<accessibility-service
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeWindowContentChanged|typeWindowStateChanged"
+
+    android:accessibilityFeedbackType="feedbackGeneric"
+
+    android:accessibilityFlags="flagDefault|flagIncludeNotImportantViews|flagRetrieveInteractiveWindows|flagRequestTouchExplorationMode"
+
+    android:notificationTimeout="100"
+    android:canRetrieveWindowContent="true"
+    android:description="@string/accessibility_service_description" />

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    底部导航菜单 — 三 Tab (v4.1)
+    模块: feature/biller/ui
+    Tab 顺序: 统计 → 账单 → 我的
+-->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_stats"
+        android:icon="@drawable/ic_chart"
+        android:title="统计" />
+    <item
+        android:id="@+id/nav_bills"
+        android:icon="@drawable/ic_receipt"
+        android:title="账单" />
+    <item
+        android:id="@+id/nav_profile"
+        android:icon="@drawable/ic_setting_24dp"
+        android:title="我的" />
+</menu>

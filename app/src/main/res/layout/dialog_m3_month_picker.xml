@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Material 3 Exposed Dropdown Menu 月份选择器 (v4.7)
+    模块: feature/biller/ui
+
+    平替方案: 放弃 NumberPicker 滚轮，改用 Material 3 规范的原生下拉菜单。
+    优势:
+      - 100% Material 3 主题适配（含暗黑模式）
+      - Exposed Dropdown Menu 是 Google 推荐的"从列表中选择一项"的标准组件
+      - 无 NumberPicker 的键盘聚焦问题和系统 UI 不一致问题
+      - 触摸区域更大，单指操作友好
+
+    设计:
+      - 两个横向并排的 OutlinedBox TextInputLayout (ExposedDropdownMenu 风格)
+      - 内部各包一个 AutoCompleteTextView，inputType="none" 强制关闭键盘
+      - 通过 ?attr 主题属性自动适配浅色/深色模式
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingTop="16dp"
+    android:paddingBottom="0dp"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:background="?attr/colorSurface">
+
+    <!-- 年份选择器 — 左侧，权重均分 -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/til_year"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:hint="年份"
+        android:layout_marginEnd="6dp">
+
+        <AutoCompleteTextView
+            android:id="@+id/actv_year"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none"
+            android:singleLine="true"
+            android:textAppearance="?attr/textAppearanceBodyLarge" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- 月份选择器 — 右侧，权重均分 -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/til_month"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:hint="月份"
+        android:layout_marginStart="6dp">
+
+        <AutoCompleteTextView
+            android:id="@+id/actv_month"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none"
+            android:singleLine="true"
+            android:textAppearance="?attr/textAppearanceBodyLarge" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+</LinearLayout>

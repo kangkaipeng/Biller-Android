@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    统计卡片圆角背景
+    注意: shape drawable 不支持 ?attr/ 主题引用，
+    此处使用 #E6E0EC 近似 M3 colorSurfaceVariant(light)。
+    如需适配深色模式，请在 drawable-night/ 下提供暗色变体。
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#E6E0EC" />
+    <corners android:radius="8dp" />
+</shape>

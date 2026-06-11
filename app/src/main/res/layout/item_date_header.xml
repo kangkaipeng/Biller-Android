@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    日期分组标题 — RecyclerView 日期分隔行 (v4)
+
+    模块: feature/biller/ui
+    用途: 在账单列表中插入日期分组标题（如 "6月8日"），
+          视觉上分隔不同日期的账单条目。
+
+    设计:
+      - Material 3 LabelLarge 字体
+      - 左侧带小色块装饰
+      - 上下留白充足，呼吸感
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingStart="20dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="16dp"
+    android:paddingBottom="8dp"
+    android:background="?attr/colorSurface">
+
+    <!-- 日期装饰色块 -->
+    <View
+        android:layout_width="4dp"
+        android:layout_height="18dp"
+        android:background="@drawable/bg_date_accent"
+        android:layout_marginEnd="12dp" />
+
+    <!-- 日期文本 -->
+    <TextView
+        android:id="@+id/tv_date_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?attr/textAppearanceLabelLarge"
+        android:textColor="?attr/colorOnSurface"
+        android:text="6月8日" />
+
+</LinearLayout>

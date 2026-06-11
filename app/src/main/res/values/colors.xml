@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Biller 模块颜色资源
+    模块: feature/biller/ui
+    职责: 定义模块级语义色，与 Material 3 主题体系协作。
+-->
+<resources>
+    <!-- 服务状态指示色 — 浅色主题 -->
+    <color name="status_connected">#4CAF50</color>
+    <color name="status_disconnected">#F44336</color>
+
+    <!-- 分类 chip：蓝色系 -->
+    <color name="chip_category_bg">#E6F1FB</color>
+    <color name="chip_category_text">#0C447C</color>
+
+    <!-- 渠道 chip：绿色系 -->
+    <color name="chip_channel_bg">#E1F5EE</color>
+    <color name="chip_channel_text">#085041</color>
+</resources>

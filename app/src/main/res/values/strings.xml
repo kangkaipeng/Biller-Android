@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Biller 模块字符串资源
+    模块: feature/biller
+-->
+<resources>
+    <string name="app_name">自动记账</string>
+    <!-- 无障碍服务描述：在系统无障碍设置页中展示 -->
+    <string name="accessibility_service_description">
+        监听微信和支付宝的支付成功页面，自动提取消费金额与商户信息，实现无感记账。
+    </string>
+</resources>

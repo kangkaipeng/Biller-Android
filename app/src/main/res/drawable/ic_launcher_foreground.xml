@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Biller App 启动图标 — 前景层 (v3)
+
+    修正: 所有元素严格收进安全区 x:27~81, y:27~81（中心72×72dp）
+    - 卡片缩小并居中，四边距安全区边缘留 6dp 以上
+    - 确认圆整体收进安全区，不被系统圆形裁剪
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- ═══ 票据卡片主体（安全区内居中，四周留白） ═══ -->
+    <path
+        android:fillColor="#F8FAFC"
+        android:pathData="
+            M30,80
+            L30,33
+            Q30,28 35,28
+            L66,28
+            L78,40
+            L78,80
+            Q78,85 73,85
+            L35,85
+            Q30,85 30,80 Z" />
+
+    <!-- ═══ 折角遮盖（右上三角，灰色） ═══ -->
+    <path
+        android:fillColor="#E2E8F0"
+        android:pathData="M66,28 L78,40 L66,40 Z" />
+
+    <!-- ═══ 折角底面（深一度） ═══ -->
+    <path
+        android:fillColor="#CBD5E1"
+        android:pathData="M66,28 L66,40 L78,40 Z" />
+
+    <!-- ═══ 第一行: 蓝色金额块 ═══ -->
+    <path
+        android:fillColor="#0EA5E9"
+        android:pathData="M37,44 Q37,41 40,41 L60,41 Q63,41 63,44 L63,48 Q63,51 60,51 L40,51 Q37,51 37,48 Z" />
+
+    <!-- ═══ 第一行右侧: 灰色金额占位 ═══ -->
+    <path
+        android:fillColor="#94A3B8"
+        android:pathData="M65,42 L74,42 Q75,42 75,43 L75,49 Q75,50 74,50 L65,50 Q64,50 64,49 L64,43 Q64,42 65,42 Z" />
+
+    <!-- ═══ 第二行: 摘要标签 ═══ -->
+    <path
+        android:fillColor="#CBD5E1"
+        android:pathData="M37,55 L50,55 Q51,55 51,56.5 Q51,58 50,58 L37,58 Q36,58 36,56.5 Q36,55 37,55 Z" />
+
+    <!-- ═══ 内容横线 1 ═══ -->
+    <path
+        android:fillColor="#E8EEF4"
+        android:pathData="M37,63 L74,63 Q75,63 75,64.5 Q75,66 74,66 L37,66 Q36,66 36,64.5 Q36,63 37,63 Z" />
+
+    <!-- ═══ 内容横线 2 ═══ -->
+    <path
+        android:fillColor="#E8EEF4"
+        android:pathData="M37,69 L68,69 Q69,69 69,70.5 Q69,72 68,72 L37,72 Q36,72 36,70.5 Q36,69 37,69 Z" />
+
+    <!-- ═══ 内容横线 3（短） ═══ -->
+    <path
+        android:fillColor="#E8EEF4"
+        android:pathData="M37,75 L56,75 Q57,75 57,76.5 Q57,78 56,78 L37,78 Q36,78 36,76.5 Q36,75 37,75 Z" />
+
+    <!-- ═══ 确认圆（完整收进安全区，右下角压住卡片） ═══ -->
+    <path
+        android:fillColor="#0D9488"
+        android:pathData="M66,67 A11,11 0 1,1 66,89 A11,11 0 1,1 66,67 Z" />
+
+    <!-- ═══ 对勾（白色） ═══ -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M61,78 L65,82 L72,74" />
+
+</vector>
