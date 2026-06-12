@@ -8,7 +8,9 @@ import com.bjbyhd.screenreader_huawei.biller.data.biller.BillRecord
 import com.bjbyhd.screenreader_huawei.biller.parser.ParsedBill
 import com.bjbyhd.screenreader_huawei.biller.parser.alipay.AlipayParser
 import com.bjbyhd.screenreader_huawei.biller.parser.wechat.WeChatParser
+import com.bjbyhd.screenreader_huawei.biller.callback.CaptureNotifier
 import com.bjbyhd.screenreader_huawei.biller.pipeline.BillProcessingPipeline
+import com.bjbyhd.screenreader_huawei.biller.pipeline.ProcessResult
 import com.bjbyhd.screenreader_huawei.logger.api.CLog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -69,7 +71,8 @@ object BillEventProcessor {
         if (result != null) {
             CLog.i(TAG) { "[A11y→管道] amount=${result.amount} merchant=${result.merchant ?: "无"}" }
             scope?.launch {
-                BillProcessingPipeline.process(result, BillRecord.FLAG_ACCESSIBILITY, windowId)
+                val pr = BillProcessingPipeline.process(result, BillRecord.FLAG_ACCESSIBILITY, windowId)
+                pr.record?.let { CaptureNotifier.onBillSaved(it) }
             }
         }
     }
@@ -103,6 +106,7 @@ object BillEventProcessor {
             CLog.i(TAG) { "[Notify→管道] amount=${result.amount} merchant=${result.merchant ?: "无"}" }
             scope?.launch {
                 BillProcessingPipeline.process(result, BillRecord.FLAG_NOTIFICATION, windowId = 0)
+                // 通知栏源不通知用户（用户已看到通知栏）
             }
         }
     }

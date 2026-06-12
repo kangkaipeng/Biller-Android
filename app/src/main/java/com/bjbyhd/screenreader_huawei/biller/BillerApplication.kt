@@ -1,6 +1,8 @@
 package com.bjbyhd.screenreader_huawei.biller
 
 import android.app.Application
+import com.bjbyhd.screenreader_huawei.biller.callback.CaptureNotifier
+import com.bjbyhd.screenreader_huawei.biller.callback.NotificationChannels
 import com.bjbyhd.screenreader_huawei.biller.data.BillRepository
 import com.bjbyhd.screenreader_huawei.biller.data.BillerDatabase
 import com.bjbyhd.screenreader_huawei.biller.data.category.Category
@@ -38,10 +40,14 @@ class BillerApplication : Application() {
             fileLevel = LogLevel.INFO
         ))
 
+        // 初始化顺序: 渠道 → 通知器（通知器依赖渠道已注册）
+        NotificationChannels.init(this)
+
         NotificationLogger.init(this)
         BillRepository.init(this)
         BillProcessingPipeline.init(this)
         BillEventProcessor.init(appScope)
+        CaptureNotifier.init(this)
 
         insertDefaultCategoriesIfNeeded()
     }

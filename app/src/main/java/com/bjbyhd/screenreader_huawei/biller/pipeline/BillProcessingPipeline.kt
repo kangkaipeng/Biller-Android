@@ -40,11 +40,11 @@ object BillProcessingPipeline {
      * @param bill       解析结果
      * @param sourceFlag 数据来源标志位 ([BillRecord.FLAG_NOTIFICATION] / [BillRecord.FLAG_ACCESSIBILITY])
      * @param windowId   无障碍窗口 ID（用于跨 session 去重，通知路径传 0）
-     * @return 插入或合并后的行 ID
+     * @return 处理结果 — caller 根据来源上下文决定是否通知用户
      */
-    suspend fun process(bill: ParsedBill, sourceFlag: Long, windowId: Int): Long {
-        val d = dao ?: return -1L
-        val amount = bill.amount ?: return -1L
+    suspend fun process(bill: ParsedBill, sourceFlag: Long, windowId: Int): ProcessResult {
+        val d = dao ?: return ProcessResult.Skipped
+        val amount = bill.amount ?: return ProcessResult.Skipped
         val merchant = bill.merchant ?: ""
 
         // L2: 持久化去重 — windowId + 金额 + 商户
@@ -53,12 +53,14 @@ object BillProcessingPipeline {
             if (duplicate != null) {
                 // 补充来源标志
                 if ((duplicate.flags and sourceFlag) == 0L) {
-                    d.update(duplicate.copy(flags = duplicate.flags or sourceFlag))
-                    CLog.i(TAG) { "[补源] id=${duplicate.id} windowId=$windowId amount=$amount — 已有记录，补标志 → ${flagsDesc(duplicate.flags or sourceFlag)}" }
+                    val updated = duplicate.copy(flags = duplicate.flags or sourceFlag)
+                    d.update(updated)
+                    CLog.i(TAG) { "[补源] id=${duplicate.id} windowId=$windowId amount=$amount — 已有记录，补标志 → ${flagsDesc(updated.flags)}" }
+                    return ProcessResult.Patched(updated)
                 } else {
                     CLog.d(TAG) { "[跳过] windowId=$windowId amount=$amount — 已存在且来源相同" }
+                    return ProcessResult.Skipped
                 }
-                return duplicate.id
             }
         }
 
@@ -78,12 +80,12 @@ object BillProcessingPipeline {
             val merged = merge(match, bill, sourceFlag)
             d.update(merged)
             CLog.i(TAG) { "[合并] id=${match.id} amount=$amount merchant=${merged.merchant} flags=${merged.flags}" }
-            match.id
+            ProcessResult.Merged(merged)
         } else {
             val record = toRecord(bill, sourceFlag, windowId)
             val rowId = d.insert(record)
             CLog.i(TAG) { "[新建] rowId=$rowId amount=$amount merchant=${record.merchant} flags=$sourceFlag windowId=$windowId" }
-            rowId
+            ProcessResult.Created(record.copy(id = rowId))
         }
     }
 
