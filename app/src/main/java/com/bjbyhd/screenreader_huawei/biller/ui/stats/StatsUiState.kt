@@ -46,7 +46,7 @@ sealed interface StatsEvent {
  */
 sealed interface StatsEffect {
     /** 导航到账单列表 Tab 并预筛选指定分类 */
-    data class NavigateToBills(val categoryId: Long?) : StatsEffect
+    data class ClickMonthSummary(val categoryId: Long?) : StatsEffect
     /** 导航到账单列表 Tab 并打开指定账单的编辑对话框 */
     data class OpenBillDetail(val billId: Long) : StatsEffect
 }

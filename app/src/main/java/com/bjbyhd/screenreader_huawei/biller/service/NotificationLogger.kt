@@ -3,13 +3,16 @@ package com.bjbyhd.screenreader_huawei.biller.service
 import android.content.Context
 import android.service.notification.StatusBarNotification
 import com.bjbyhd.screenreader_huawei.logger.api.CLog
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileWriter
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import java.util.concurrent.Executors
 
 /**
  * 通知栏数据记录器
@@ -22,21 +25,23 @@ object NotificationLogger {
     private const val TAG = "NotifyLog"
 
     private var logFile: File? = null
+    private var scope: CoroutineScope? = null
     private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
-    private val executor = Executors.newSingleThreadExecutor()
 
     fun init(context: Context) {
         logFile = File(context.filesDir, "Notification.log")
+        scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     }
 
     fun log(sbn: StatusBarNotification) {
         val file = logFile ?: return
+        val s = scope ?: return
 
         val title = sbn.notification.extras?.getString("android.title") ?: ""
         val text = sbn.notification.extras?.getString("android.text") ?: ""
         CLog.i(TAG) { "[通知] pkg=${sbn.packageName} | id=${sbn.id} | title=$title | text=$text" }
 
-        executor.execute {
+        s.launch {
             try {
                 FileWriter(file, true).use { writer ->
                     writer.appendLine("══════ ${formatter.format(Instant.now().atZone(ZoneId.systemDefault()))} ══════")

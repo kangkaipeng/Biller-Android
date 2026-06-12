@@ -119,11 +119,7 @@ class BillListViewModel(
         when (event) {
             is BillListEvent.ClickBill          -> onBillClicked(event.bill)
             is BillListEvent.LongPressBill      -> onBillLongPressed(event.bill)
-            is BillListEvent.UpdateAlias        -> onUpdateAlias(event.billId, event.alias)
             is BillListEvent.UpdateCategory     -> onUpdateCategory(event.billId, event.categoryId)
-            is BillListEvent.UpdateNote         -> onUpdateNote(event.billId, event.note)
-            is BillListEvent.UpdateAmount       -> onUpdateAmount(event.billId, event.amount)
-            is BillListEvent.UpdateTransactionId -> onUpdateTransactionId(event.billId, event.txnId)
             is BillListEvent.UpdateBillFields  -> onUpdateBillFields(
                 event.billId, event.alias, event.note, event.amount, event.txnId
             )
@@ -149,28 +145,13 @@ class BillListViewModel(
         sendEffect(BillListEffect.CopyToClipboard(text))
     }
 
-    private fun onUpdateAlias(billId: Long, alias: String) {
-        launchSafe { billRepo.updateBillFields(billId, alias = alias) }
-    }
-
+    /** 更新消费分类 */
     private fun onUpdateCategory(billId: Long, categoryId: Long?) {
         launchSafe { billRepo.updateBillFields(billId, categoryId = categoryId) }
     }
 
-    private fun onUpdateNote(billId: Long, note: String) {
-        launchSafe { billRepo.updateBillFields(billId, note = note) }
-    }
-
-    private fun onUpdateAmount(billId: Long, amount: Double) {
-        launchSafe { billRepo.updateBillFields(billId, amount = amount) }
-    }
-
-    private fun onUpdateTransactionId(billId: Long, txnId: String) {
-        launchSafe { billRepo.updateBillFields(billId, txnId = txnId) }
-    }
-
     /**
-     * 批量更新账单字段 (v5.2)
+     * 批量更新账单字段
      *
      * 将多个字段的变更合并为单次 Repository 调用:
      *   1× getById + 1× update → 1× Room Flow 发射 → 1× UI 重建
@@ -265,18 +246,16 @@ class BillListViewModel(
         }
     }
 
-    // ═══════════ 状态构建 — 4 个显式输入 ═══════════
+    // ═══════════ 状态构建 — 5 个显式输入 ═══════════
 
     /**
-     * 将原始数据 + 筛选条件映射为 UI 状态 (v4.2)
-     *
-     * 所有筛选条件均为显式参数——不再从 [_uiState.value] 隐式读取。
+     * 将原始数据 + 筛选条件映射为 UI 状态
      *
      * @param records        全量账单记录（来自 observeAll Flow）
      * @param categories     全部分类信息（来自 observeCategories Flow）
      * @param month          目标年月（来自 _selectedMonth Flow）
-     * @param filterCategoryId 分类筛选条件（来自 _filterCategoryId Flow）:
-     *                         null=全部, -1L=未分类, 其他=具体分类ID
+     * @param filterCategoryId 分类筛选条件: null=全部, -1L=未分类, 其他=具体分类ID
+     * @param filterChannel  渠道筛选条件: null=全部, WEIXIN/ALIPAY/OTHER
      */
     private fun buildUiState(
         records: List<BillRecord>,

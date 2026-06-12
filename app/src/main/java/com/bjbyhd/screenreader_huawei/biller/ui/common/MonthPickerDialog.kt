@@ -13,6 +13,9 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputLayout
 import java.time.YearMonth
 
+/** 年份选择下限 */
+private const val MIN_SELECTABLE_YEAR = 2000
+
 /**
  * Material 3 Exposed Dropdown Menu 月份选择器弹窗
  *
@@ -58,13 +61,13 @@ fun showMonthPickerDialog(
         if (actvMonth.isPopupShowing) actvMonth.dismissDropDown()
     }
 
-    // ═══════════ 年份数据源: 2000 ~ 当前年份 ═══════════
-    val yearItems = (2000..currentYear).map { "${it}年" }.toTypedArray()
+    // ═══════════ 年份数据源: MIN_SELECTABLE_YEAR ~ 当前年份 ═══════════
+    val yearItems = (MIN_SELECTABLE_YEAR..currentYear).map { "${it}年" }.toTypedArray()
     val yearAdapter = ArrayAdapter(context, android.R.layout.simple_spinner_dropdown_item, yearItems)
     actvYear.setAdapter(yearAdapter)
 
     // 填入初始年份
-    val initialYear = initialYearMonth.year.coerceIn(2000, currentYear)
+    val initialYear = initialYearMonth.year.coerceIn(MIN_SELECTABLE_YEAR, currentYear)
     actvYear.setText("${initialYear}年", false)
 
     tilYear.setEndIconOnClickListener { actvYear.showDropDown() }

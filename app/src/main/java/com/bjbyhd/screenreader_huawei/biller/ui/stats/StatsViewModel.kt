@@ -33,7 +33,7 @@ import java.time.YearMonth
  *    │                                │
  *    ├─ onEvent(SelectMonth) ──────→ when(event) { ... }
  *    │                                │
- *    ├─ onEvent(ClickCategory) ────→ sendEffect(NavigateToBills)
+ *    ├─ onEvent(ClickCategory) ────→ sendEffect(ClickMonthSummary)
  * ```
  *
  * ## 聚合策略
@@ -111,7 +111,7 @@ class StatsViewModel(
 
     /** 点击分类 → 发射跨 Tab 导航 Effect */
     private fun onCategoryClicked(categoryId: Long) {
-        sendEffect(StatsEffect.NavigateToBills(categoryId))
+        sendEffect(StatsEffect.ClickMonthSummary(categoryId))
     }
 
     /** 点击最近交易 → 发射跨 Tab 导航 Effect（跳转并打开编辑对话框） */
@@ -122,41 +122,28 @@ class StatsViewModel(
     // ═══════════ 聚合计算 — 数据 → UiState ═══════════
 
     /**
-     * 将原始账单记录 + 分类信息 + 目标月份 聚合为 [StatsUiState]
+     * 将原始数据聚合为 [StatsUiState]
      *
-     * # 处理流程
+     * 处理流程: 月度筛选 → 收支分离 → 汇总 → 环比 → 分类分布 → 最近交易。
+     * 使用内存聚合而非 SQL，避免对 observeAll 已加载数据做二次查询。
      *
-     *   1. 按月份筛选 — 将 timestamp 在目标月时间窗内的记录筛出
-     *   2. 收支分离 — amount > 0 为支出，amount < 0 为收入
-     *   3. 月度汇总 — SUM / COUNT 计算四项基本指标
-     *   4. 环比计算 — 与上月支出对比
-     *   5. 分类分布 — 按 categoryId groupBy，关联分类元数据，计算百分比
-     *   6. 最近交易 — 取 timestamp 降序前 5 条，映射为轻量快照
+     * 数据约定: amount > 0 为支出，amount < 0 为收入。
      *
-     * # 为什么用内存聚合而非 SQL
-     *
-     *   Room Flow 的 [observeAll] 发射的数据已经在内存中。如果此时再调用
-     *   Repository 的 SQL 聚合方法（suspend fun），等于对同一批数据做了两次查询。
-     *   直接内存聚合利用已加载的数据，响应更快，且能自动随 Flow 变化而更新。
-     *
-     * @param records    全量账单记录（来自 observeAll Flow）
-     * @param categories 全部分类信息（来自 observeCategories Flow）
-     * @param month      目标年月（来自 _selectedMonth Flow）
-     * @return 完整的 StatsUiState 快照
+     * @param records    全量账单记录
+     * @param categories 全部分类信息
+     * @param month      目标年月
      */
     private suspend fun computeStats(
         records: List<BillRecord>,
         categories: List<Category>,
         month: YearMonth,
     ): StatsUiState {
-        // ── 步骤 1: 按月份筛选 ──
+        // 月度筛选 + 收支分离（amount > 0 = 支出，< 0 = 收入）
         val range = month.toMillisRange()
         val monthRecords = records.filter { record ->
             record.timestamp in range.first..range.second
         }
 
-        // ── 步骤 2: 收支分离 ──
-        // 数据模型约定: amount > 0 为支出（用户付钱），amount < 0 为收入（用户收钱）
         val expenseRecords = monthRecords.filter { (it.amount ?: 0.0) > 0 }
         val incomeRecords  = monthRecords.filter { (it.amount ?: 0.0) < 0 }
 
@@ -165,14 +152,11 @@ class StatsViewModel(
         val expenseCount = expenseRecords.size
         val incomeCount  = incomeRecords.size
 
-        // ── 步骤 3: 环比计算 ──
+        // 环比 + 分类分布 + 最近交易
         val (lastExpense, momRate) = computeMoM(records, month, totalExpense)
 
-        // ── 步骤 4: 分类分布 ──
         val categoryMap = categories.associateBy { it.id }
         val breakdown = computeCategoryBreakdown(expenseRecords, categoryMap, totalExpense)
-
-        // ── 步骤 5: 最近交易快照 ──
         val recentBills = monthRecords
             .sortedByDescending { it.timestamp }
             .take(5)

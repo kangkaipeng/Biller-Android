@@ -59,7 +59,14 @@ class BillEditDialog : BottomSheetDialogFragment() {
         private const val ARG_BILL_CATEGORY_ID = "bill_category_id"
         private const val ARG_BILL_CATEGORY_NAME = "bill_category_name"
 
-        private val TIME_FORMAT = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        private val TIME_FORMAT_TL = ThreadLocal.withInitial {
+            SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        }
+
+        /** 金额上限 — 1 亿元 */
+        private const val MAX_AMOUNT = 100_000_000.0
+        /** 键盘收起动画延迟 (ms) */
+        private const val KEYBOARD_DELAY_MS = 200L
 
         /** 分类列表序列化 Key */
         private const val ARG_CATEGORY_IDS = "cat_ids"
@@ -181,7 +188,7 @@ class BillEditDialog : BottomSheetDialogFragment() {
             // ── 交易时间（始终只读）──
             val timestamp = args.getLong(ARG_BILL_TIMESTAMP, 0L)
             tvTimeDisplay.text = if (timestamp > 0)
-                TIME_FORMAT.format(Date(timestamp)) else "—"
+                TIME_FORMAT_TL.get().format(Date(timestamp)) else "—"
 
             // ── 消费分类（Chip，始终只读）──
             val catName = args.getString(ARG_BILL_CATEGORY_NAME)
@@ -392,32 +399,10 @@ class BillEditDialog : BottomSheetDialogFragment() {
     // ═══════════════════════════════════════════════════════════════
 
     /**
-     * 保存编辑内容 — 差异对比 + 批量发射 [BillListEvent.UpdateBillFields] (v5.2)
+     * 保存编辑内容 — 逐字段差异对比后发射 [BillListEvent.UpdateBillFields]
      *
-     * ## v5.2 变更: 批量更新收敛
-     *
-     * 旧实现逐字段独立发射 [UpdateAlias] / [UpdateAmount] / [UpdateNote] /
-     * [UpdateTransactionId]，每个事件触发一次 Room 写入 → Flow 发射 →
-     * buildUiState → adapter.submitList，导致:
-     *   - 4 次 getById + 4 次 update（8 次 DAO 操作）
-     *   - 4 次全量列表重建 + DiffUtil 排队
-     *   - 多协程并发写同一记录 → 潜在的丢失修改
-     *
-     * 新实现将所有变更收集后发射单个 [UpdateBillFields] 事件，
-     * Repository 层一次性完成 1× getById + 1× update，
-     * 仅触发 1 次 Room Flow 发射 → 1 次 UI 重建。
-     *
-     * ## 数据流
-     *
-     * ```
-     * onSaveClicked()
-     *   ├─ 校验金额（<=0 或 >1亿 忽略）
-     *   ├─ 逐字段对比差异 → 收集到 changedXxx 局部变量
-     *   ├─ 若任一字段变更 → 发射 UpdateBillFields（仅含变更字段，null = 无变更）
-     *   ├─ 立即隐藏 tilNote（消除双备注栏窗口期，P2-6.1 修复）
-     *   ├─ syncDisplayFromEdit() → 更新只读展示区
-     *   └─ setBrowseMode() → 切回浏览模式
-     * ```
+     * 仅将发生变化的字段通过单个批量事件发送，Repository 层 1× getById + 1× update，
+     * 避免逐字段独立发射导致的多次 DAO 操作和 UI 重建。
      */
     private fun onSaveClicked() {
         val args = arguments ?: return
@@ -437,7 +422,7 @@ class BillEditDialog : BottomSheetDialogFragment() {
                 newAmount <= 0.0 -> {
                     CLog.w(TAG) { "金额无效 (<=0): $newAmount，已忽略" }
                 }
-                newAmount > 100_000_000.0 -> {
+                newAmount > MAX_AMOUNT -> {
                     CLog.w(TAG) { "金额异常 (>1亿): $newAmount，已忽略" }
                 }
                 else -> {
@@ -529,10 +514,10 @@ class BillEditDialog : BottomSheetDialogFragment() {
     /** 取消编辑 → 先隐藏键盘，再恢复表单原始值 + 回到浏览模式 (v5) */
     private fun onCancelEditClicked() {
         hideKeyboard()
-        // 延迟切换——键盘收起动画约 200ms
+        // 延迟切换——键盘收起动画约 KEYBOARD_DELAY_MS
         binding.root.postDelayed({
             populateFields()  // 重新从 arguments 填充，丢弃修改
-        }, 200)
+        }, KEYBOARD_DELAY_MS)
     }
 
     /** 删除账单 → 发射事件 + 关闭对话框 */
@@ -554,6 +539,7 @@ class BillEditDialog : BottomSheetDialogFragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        binding.root.removeCallbacks(null)
         _binding = null
     }
 

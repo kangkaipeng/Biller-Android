@@ -2,6 +2,7 @@ package com.bjbyhd.screenreader_huawei.biller.ui.profile
 
 import android.content.Intent
 import android.os.Bundle
+import com.bjbyhd.screenreader_huawei.biller.BuildConfig
 import android.view.LayoutInflater
 import android.widget.Toast
 import android.view.View
@@ -79,10 +80,10 @@ class ProfileFragment : Fragment() {
             btnRefreshStatus.setOnClickListener {
                 viewModel.onEvent(ProfileEvent.CheckServiceStatus)
             }
-            btnNotificationSettings.setOnClickListener {
+            icNotificationChevron.setOnClickListener {
                 viewModel.onEvent(ProfileEvent.OpenNotificationSettings)
             }
-            btnAccessibilitySettings.setOnClickListener {
+            icAccessibilityChevron.setOnClickListener {
                 viewModel.onEvent(ProfileEvent.OpenAccessibilitySettings)
             }
             btnAbout.setOnClickListener {
@@ -152,6 +153,8 @@ class ProfileFragment : Fragment() {
                             binding.btnClearLogs.text = "🗑️ 清除日志"
                             binding.btnClearLogs.isEnabled = true
                         }
+
+                        binding.tvVersion.text = getString(R.string.version_format, BuildConfig.VERSION_NAME)
 
                         // ── 最后检查时间 ──
                         state.lastCheckTime?.let { timeMs ->

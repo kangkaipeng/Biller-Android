@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    我的 Tab 布局 (v4.1)
+    我的 Tab 布局 (v4.2)
     模块: feature/biller/ui/profile
-    功能: 服务状态指示 + 权限入口按钮 + 关于/导出
+    功能: 服务状态指示 + 权限入口（整行可点击）+ 关于/导出
+    改动: 去掉状态行独立按钮，改为整行 clickable + 右侧 chevron 图标
 -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/colorSurface">
@@ -16,7 +18,7 @@
         android:orientation="vertical"
         android:padding="20dp">
 
-        <!-- ═══════ 服务状态卡片 ═══════ -->
+        <!-- ═══════ 运行状态与服务卡片 ═══════ -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -33,137 +35,165 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="服务状态"
+                    android:text="运行状态与服务"
                     android:textAppearance="?attr/textAppearanceTitleSmall"
                     android:textColor="?attr/colorOnSurface"
-                    android:layout_marginBottom="12dp" />
+                    android:layout_marginBottom="16dp" />
 
-                <!-- 通知监听状态行 -->
-                <LinearLayout
+                <!-- 通知监听状态行（整行可点击） -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/row_notification"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:layout_marginBottom="8dp">
+                    android:layout_height="48dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground">
 
                     <View
                         android:id="@+id/dot_notification"
                         android:layout_width="10dp"
                         android:layout_height="10dp"
-                        android:background="@drawable/bg_status_dot" />
+                        android:background="@drawable/bg_status_dot"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
+                        android:id="@+id/tv_notification_title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:layout_marginStart="12dp"
                         android:text="通知监听"
                         android:textAppearance="?attr/textAppearanceBodyLarge"
-                        android:textColor="?attr/colorOnSurface" />
+                        android:textColor="?attr/colorOnSurface"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/tv_notification_status"
+                        app:layout_constraintStart_toEndOf="@id/dot_notification"
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
                         android:id="@+id/tv_notification_status"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="检测中..."
-                        android:textAppearance="?attr/textAppearanceBodySmall"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
-                </LinearLayout>
+                        android:layout_marginEnd="4dp"
+                        tools:text="未授权"
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:textColor="?attr/colorError"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/ic_notification_chevron"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-                <!-- 无障碍服务状态行 -->
-                <LinearLayout
+                    <ImageView
+                        android:id="@+id/ic_notification_chevron"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_chevron_right_24dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:tint="?attr/colorOnSurfaceVariant" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+                <!-- 无障碍服务状态行（整行可点击） -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/row_accessibility"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:layout_height="48dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground">
 
                     <View
                         android:id="@+id/dot_accessibility"
                         android:layout_width="10dp"
                         android:layout_height="10dp"
-                        android:background="@drawable/bg_status_dot" />
+                        android:background="@drawable/bg_status_dot"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
+                        android:id="@+id/tv_accessibility_title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:layout_marginStart="12dp"
                         android:text="无障碍服务"
                         android:textAppearance="?attr/textAppearanceBodyLarge"
-                        android:textColor="?attr/colorOnSurface" />
+                        android:textColor="?attr/colorOnSurface"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/tv_accessibility_status"
+                        app:layout_constraintStart_toEndOf="@id/dot_accessibility"
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
                         android:id="@+id/tv_accessibility_status"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="检测中..."
-                        android:textAppearance="?attr/textAppearanceBodySmall"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
-                </LinearLayout>
+                        android:layout_marginEnd="4dp"
+                        tools:text="已连接"
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:textColor="?attr/colorTertiary"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/ic_accessibility_chevron"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-                <!-- 重新检查按钮 -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_refresh_status"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:text="重新检查" />
+                    <ImageView
+                        android:id="@+id/ic_accessibility_chevron"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_chevron_right_24dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:tint="?attr/colorOnSurfaceVariant" />
 
-                <!-- 上次检查时间 -->
-                <TextView
-                    android:id="@+id/tv_last_check_time"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:text="上次检查：-"
-                    android:textAppearance="?attr/textAppearanceBodySmall"
-                    android:textColor="?attr/colorOnSurfaceVariant" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <!-- ═══════ 权限入口卡片 ═══════ -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardElevation="1dp"
-            app:cardCornerRadius="12dp"
-            app:contentPadding="16dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="服务入口"
-                    android:textAppearance="?attr/textAppearanceTitleSmall"
-                    android:textColor="?attr/colorOnSurface"
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:background="?attr/colorOutlineVariant"
+                    android:layout_marginTop="8dp"
                     android:layout_marginBottom="8dp" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_notification_settings"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
+                <!-- 上次检查时间 + 重新检查按钮 -->
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:layout_marginBottom="8dp"
-                    android:text="开启通知监听权限"
-                    app:cornerRadius="12dp" />
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_accessibility_settings"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:text="开启无障碍服务"
-                    app:cornerRadius="12dp" />
+                    <TextView
+                        android:id="@+id/tv_last_check_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="上次检查：10分钟前"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:paddingTop="24dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_refresh_status"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="重新检查"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- ═══════ 其他 ═══════ -->
+        <!-- ═══════ 其他操作卡片 ═══════ -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -175,22 +205,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/btn_about"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp"
-                    android:text="📱 关于"
-                    android:textAppearance="?attr/textAppearanceBodyLarge"
-                    android:textColor="?attr/colorOnSurface"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:foreground="?attr/selectableItemBackground"
-                    android:background="@null" />
-
-                <View android:layout_width="match_parent" android:layout_height="0.5dp"
-                    android:background="?attr/colorOutlineVariant" />
 
                 <TextView
                     android:id="@+id/btn_export_csv"
@@ -205,7 +219,9 @@
                     android:foreground="?attr/selectableItemBackground"
                     android:background="@null" />
 
-                <View android:layout_width="match_parent" android:layout_height="0.5dp"
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
                     android:background="?attr/colorOutlineVariant" />
 
                 <!-- v5.3: CSV 全量导入 — 通过系统文件选择器选择 .csv 文件导入 -->
@@ -222,7 +238,9 @@
                     android:foreground="?attr/selectableItemBackground"
                     android:background="@null" />
 
-                <View android:layout_width="match_parent" android:layout_height="0.5dp"
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
                     android:background="?attr/colorOutlineVariant" />
 
                 <!-- v5.2: 日志导出 — 打包全部 .log 文件为 ZIP 并通过系统分享 -->
@@ -239,7 +257,9 @@
                     android:foreground="?attr/selectableItemBackground"
                     android:background="@null" />
 
-                <View android:layout_width="match_parent" android:layout_height="0.5dp"
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
                     android:background="?attr/colorOutlineVariant" />
 
                 <!-- v5.2: 清除日志 — 删除全部 .log 文件，立即启动新会话 -->
@@ -255,6 +275,44 @@
                     android:focusable="true"
                     android:foreground="?attr/selectableItemBackground"
                     android:background="@null" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:background="?attr/colorOutlineVariant" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/btn_about"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="16dp"
+                        android:text="📱 关于"
+                        android:textAppearance="?attr/textAppearanceBodyLarge"
+                        android:textColor="?attr/colorOnSurface"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground"
+                        android:background="@null"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tv_version"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="v-.-.-"
+                        android:textSize="12sp"
+                        android:paddingEnd="24dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>

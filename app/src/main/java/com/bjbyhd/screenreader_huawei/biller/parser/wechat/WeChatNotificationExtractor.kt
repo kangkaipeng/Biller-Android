@@ -62,6 +62,12 @@ object WeChatNotificationExtractor  {
 
     private const val TAG = "Biller/WeChatNotify"
 
+    // ═══════════════════════════════════════════════════════════════
+    // 通用
+    // ═══════════════════════════════════════════════════════════════
+
+    private val BLANK_REGEX = Regex("\\s+")
+
     // ── 包名常量 ──────────────────────────────────────────────────────
 
     /** @see TargetConfig.WECHAT_PACKAGE */
@@ -233,7 +239,7 @@ object WeChatNotificationExtractor  {
     private fun normalize(title: String, text: String): String {
         return "$title $text"
             .replace("\n", " ")
-            .replace("\\s+".toRegex(), " ")
+            .replace(BLANK_REGEX, " ")
             .trim()
     }
 

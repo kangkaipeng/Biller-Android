@@ -1,6 +1,5 @@
 package com.bjbyhd.screenreader_huawei.biller.ui.stats
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -214,7 +213,8 @@ class StatsFragment : Fragment() {
 
         val isIncreased = rate >= 0f
         // 支出增加→红色警示；支出减少→绿色积极
-        val color = if (isIncreased) Color.parseColor("#F44336") else Color.parseColor("#4CAF50")
+        val color = if (isIncreased) requireContext().getColor(R.color.stat_bar_expense)
+                    else requireContext().getColor(R.color.stat_bar_income)
         val arrow = if (isIncreased) "▲" else "▼"
         val sign = if (isIncreased) "+" else ""
 
@@ -283,7 +283,7 @@ class StatsFragment : Fragment() {
             row.addView(TextView(requireContext()).apply {
                 text = item.categoryName
                 setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
-                setTextColor(Color.parseColor("#212121"))
+                setTextColor(requireContext().getColor(R.color.text_primary_dark))
                 layoutParams = LinearLayout.LayoutParams(
                     0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f
                 )
@@ -302,7 +302,7 @@ class StatsFragment : Fragment() {
                 layoutParams = LinearLayout.LayoutParams(barMaxWidth, 8).apply {
                     marginStart = 4; marginEnd = 4
                 }
-                setBackgroundColor(Color.parseColor("#E0E0E0"))
+                setBackgroundColor(requireContext().getColor(R.color.divider_light))
             }
             val barInner = View(requireContext()).apply {
                 layoutParams = android.widget.FrameLayout.LayoutParams(barWidth, 8)
@@ -315,7 +315,7 @@ class StatsFragment : Fragment() {
             row.addView(TextView(requireContext()).apply {
                 text = "${String.format("%.1f", item.percentage * 100)}%"
                 textSize = 11f
-                setTextColor(Color.parseColor("#757575"))
+                setTextColor(requireContext().getColor(R.color.text_secondary))
                 layoutParams = LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
@@ -396,8 +396,8 @@ class StatsFragment : Fragment() {
                 text = "$amountPrefix${String.format("%.2f", bill.amount)}"
                 setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
                 setTextColor(
-                    if (bill.isIncome) Color.parseColor("#4CAF50")
-                    else Color.parseColor("#F44336")
+                    if (bill.isIncome) requireContext().getColor(R.color.stat_bar_income)
+                    else requireContext().getColor(R.color.stat_bar_expense)
                 )
                 setPadding(8, 0, 0, 0)
             })
@@ -406,7 +406,7 @@ class StatsFragment : Fragment() {
             row.addView(TextView(requireContext()).apply {
                 text = TIME_FORMAT.format(Date(bill.timestamp))
                 setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodySmall)
-                setTextColor(Color.parseColor("#9E9E9E"))
+                setTextColor(requireContext().getColor(R.color.text_hint))
                 setPadding(8, 0, 0, 0)
             })
 
@@ -420,12 +420,12 @@ class StatsFragment : Fragment() {
      * 消费 ViewModel Effect Channel 的一次性事件
      *
      * 当前处理的 Effect:
-     *   - NavigateToBills: 点击分类 → 切换到账单 Tab 并预筛选
+     *   - ClickMonthSummary: 点击分类 → 切换到账单 Tab 并预筛选
      *   - OpenBillDetail: 点击最近交易 → 切换到账单 Tab 并打开编辑对话框
      */
     private fun handleEffect(effect: Any?) {
         when (effect) {
-            is StatsEffect.NavigateToBills -> {
+            is StatsEffect.ClickMonthSummary -> {
                 CLog.d(TAG) {
                     "Effect: 导航到账单列表 | categoryId=${effect.categoryId}"
                 }
@@ -440,7 +440,7 @@ class StatsFragment : Fragment() {
                 }
                 val activity = activity
                 if (activity is com.bjbyhd.screenreader_huawei.biller.ui.main.BillDashboardActivity) {
-                    activity.openBillEdit(effect.billId)
+                    activity.openBillDetail(effect.billId)
                 }
             }
         }

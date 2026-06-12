@@ -5,6 +5,9 @@
     职责: 定义模块级语义色，与 Material 3 主题体系协作。
 -->
 <resources>
+    <color name="primary_color">#0C447C</color>
+
+
     <!-- 服务状态指示色 — 浅色主题 -->
     <color name="status_connected">#4CAF50</color>
     <color name="status_disconnected">#F44336</color>
@@ -16,4 +19,16 @@
     <!-- 渠道 chip：绿色系 -->
     <color name="chip_channel_bg">#E1F5EE</color>
     <color name="chip_channel_text">#085041</color>
+
+    <!-- 统计条颜色 -->
+    <color name="stat_bar_expense">#F44336</color>
+    <color name="stat_bar_income">#4CAF50</color>
+
+    <!-- 文本颜色 -->
+    <color name="text_primary_dark">#212121</color>
+    <color name="text_secondary">#757575</color>
+    <color name="text_hint">#9E9E9E</color>
+
+    <!-- 分割线 / 边框 -->
+    <color name="divider_light">#E0E0E0</color>
 </resources>

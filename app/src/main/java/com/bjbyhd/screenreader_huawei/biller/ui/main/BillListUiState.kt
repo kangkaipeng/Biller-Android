@@ -34,7 +34,6 @@ import com.bjbyhd.screenreader_huawei.biller.data.biller.BillRecord
  * @property categories     所有可选消费分类（对话框下拉选择器用）
  * @property isLoading      首次加载中标志（true 时显示 progress indicator）
  * @property editingBill    当前正在编辑的账单条目（null = 无对话框）
- * @property clipboardMessage 剪贴板操作反馈文本（null = 无操作）
  */
 data class BillListUiState(
     val bills: List<BillDisplayItem> = emptyList(),
@@ -96,21 +95,6 @@ sealed interface BillListEvent {
     /** 长按账单条目 → 复制到剪贴板 */
     data class LongPressBill(val bill: BillRecord) : BillListEvent
 
-    /** 更新商户别名 */
-    data class UpdateAlias(val billId: Long, val alias: String) : BillListEvent
-
-    /** 更新消费分类（null = 移除分类） */
-    data class UpdateCategory(val billId: Long, val categoryId: Long?) : BillListEvent
-
-    /** 更新备注 */
-    data class UpdateNote(val billId: Long, val note: String) : BillListEvent
-
-    /** 更新金额 */
-    data class UpdateAmount(val billId: Long, val amount: Double) : BillListEvent
-
-    /** 更新交易流水号 */
-    data class UpdateTransactionId(val billId: Long, val txnId: String) : BillListEvent
-
     /**
      * 批量更新账单可编辑字段 (v5.2)
      *
@@ -126,6 +110,9 @@ sealed interface BillListEvent {
      * @property amount 金额，null = 不修改
      * @property txnId  交易流水号，null = 不修改
      */
+    /** 更新消费分类（null = 移除分类） */
+    data class UpdateCategory(val billId: Long, val categoryId: Long?) : BillListEvent
+
     data class UpdateBillFields(
         val billId: Long,
         val alias: String? = null,

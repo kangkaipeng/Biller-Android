@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Biller</string>
+    <string name="version_format">v%s</string>
+    <string name="accessibility_service_description">
+        Monitors WeChat and Alipay payment success pages, automatically extracts transaction amount and merchant info for effortless bookkeeping.
+    </string>
+
+    <!-- Bill Import/Export -->
+    <string name="exporting">Exporting…</string>
+    <string name="export_csv_full">📥 Export CSV (Full)</string>
+    <string name="importing">Importing…</string>
+    <string name="import_csv">📤 Import CSV</string>
+    <string name="packing_logs">Packing…</string>
+    <string name="export_logs">📋 Export Logs</string>
+    <string name="clearing_logs">Clearing…</string>
+    <string name="clear_logs">🗑️ Clear Logs</string>
+
+    <!-- Settings -->
+    <string name="settings_saved">Settings saved</string>
+
+    <!-- Month Picker -->
+    <string name="select_month">Select Month</string>
+
+    <!-- Common -->
+    <string name="confirm">OK</string>
+    <string name="cancel">Cancel</string>
+</resources>

@@ -109,7 +109,7 @@ class BillDashboardActivity : AppCompatActivity() {
      *
      * @param billId 目标账单 ID
      */
-    fun openBillEdit(billId: Long) {
+    fun openBillDetail(billId: Long) {
         switchFragment(R.id.nav_bills)
         // 强制同步执行 Fragment 事务 — 确保 Fragment 生命周期完成
         supportFragmentManager.executePendingTransactions()

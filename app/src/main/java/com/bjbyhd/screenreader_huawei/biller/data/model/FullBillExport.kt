@@ -9,7 +9,7 @@ package com.bjbyhd.screenreader_huawei.biller.data.model
  * ## 与 BillRecord 的关系
  *
  *   [FullBillExport] 是 [BillRecord] 的"扁平化投影"：除包含所有数据库字段外，
- *   还通过 LEFT JOIN 关联 [Category] 表填充 [categoryName] 字段。
+ *   还通过 Repository 层内存映射关联 [Category] 表填充 [categoryName] 字段。
  *   这使得 CSV 导出对人类可读（分类名称而非 ID），同时保留了全部结构化数据
  *   以供导入还原。
  *

@@ -5,13 +5,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.bjbyhd.screenreader_huawei.biller.BuildConfig
+import com.bjbyhd.screenreader_huawei.biller.R
 import com.bjbyhd.screenreader_huawei.biller.databinding.DialogAboutBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 /**
- * 关于 BottomSheet — 替代旧版 AboutFragment (Phase 4)
+ * 关于 BottomSheet — 替代旧版 AboutFragment
  *
  * 模块: feature/biller/ui/about
  * 职责: 以 BottomSheet 形式展示应用信息、隐私权限说明、保活指南入口。
@@ -51,6 +53,7 @@ class AboutBottomSheet : BottomSheetDialogFragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = DialogAboutBinding.inflate(inflater, container, false)
+        binding.tvVersionAbout.text = getString(R.string.version_format, BuildConfig.VERSION_NAME)
         return binding.root
     }
 

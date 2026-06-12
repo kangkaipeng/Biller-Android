@@ -7,7 +7,7 @@ import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
 /**
- * 消费分类 DAO — Room 数据访问对象 (v4)
+ * 消费分类 DAO — Room 数据访问对象
  *
  * 模块: feature/biller/data
  * 职责: 定义 [Category] 的所有数据库操作接口，

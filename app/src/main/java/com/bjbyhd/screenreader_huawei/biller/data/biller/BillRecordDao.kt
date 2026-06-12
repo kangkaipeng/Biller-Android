@@ -133,7 +133,7 @@ interface BillRecordDao {
     suspend fun count(): Int
 
     /**
-     * 按 ID 精确查询单条记录 (v4)
+     * 按 ID 精确查询单条记录
      *
      * 用于 UI 层单字段更新前获取完整记录以便 copy()。
      *
@@ -144,7 +144,7 @@ interface BillRecordDao {
     suspend fun getById(id: Long): BillRecord?
 
     /**
-     * 获取已识别的去重商户名列表 (v4)
+     * 获取已识别的去重商户名列表
      *
      * 用于商户别名管理页面展示所有历史上出现过的商户。
      * 按时间戳降序排列，最近出现的商户排在前。
@@ -152,7 +152,7 @@ interface BillRecordDao {
     @Query("SELECT DISTINCT merchant FROM bill_records WHERE merchant IS NOT NULL ORDER BY timestamp DESC")
     suspend fun findDistinctMerchants(): List<String>
 
-    // ═══════════ 统计聚合查询 (Phase 5B) ═══════════
+    // ═══════════ 统计聚合查询 ═══════════
 
     /**
      * 月度收支汇总聚合查询

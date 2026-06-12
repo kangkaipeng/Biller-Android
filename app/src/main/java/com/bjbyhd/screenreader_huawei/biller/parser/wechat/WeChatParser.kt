@@ -2,7 +2,6 @@ package com.bjbyhd.screenreader_huawei.biller.parser.wechat
 
 import android.service.notification.StatusBarNotification
 import android.view.accessibility.AccessibilityNodeInfo
-import com.bjbyhd.screenreader_huawei.biller.config.TargetConfig
 import com.bjbyhd.screenreader_huawei.biller.parser.ParsedBill
 import com.bjbyhd.screenreader_huawei.logger.api.CLog
 
@@ -27,6 +26,7 @@ object WeChatParser {
      */
     fun parseAccessibility(rootNode: AccessibilityNodeInfo, receivedAt: Long): ParsedBill? {
         CLog.i(TAG) { "[WeChat] parseAccessibility: 开始 → rootNode.className=${rootNode.className}" }
+//        AccessibilityTreeDumper.dump(rootNode, TAG)
         val result = WeChatScreenExtractor.parse(rootNode, receivedAt)
         CLog.i(TAG) { "[WeChat] parseAccessibility: 完成 → amount=${result?.amount} merchant=${result?.merchant}" }
         return result

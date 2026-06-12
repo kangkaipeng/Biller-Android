@@ -42,6 +42,12 @@ object AlipayNotificationExtractor  {
     private const val TAG = "Biller/AlipayNotify"
 
     // ═══════════════════════════════════════════════════════════════
+    // 通用
+    // ═══════════════════════════════════════════════════════════════
+
+    private val BLANK_REGEX = Regex("\\s+")
+
+    // ═══════════════════════════════════════════════════════════════
     // 正则
     // ═══════════════════════════════════════════════════════════════
 
@@ -92,7 +98,7 @@ object AlipayNotificationExtractor  {
         if (packageName != TargetConfig.ALIPAY_PACKAGE) return null
 
         val normalized = "$title $text".replace("\n", " ")
-            .replace("\\s+".toRegex(), " ").trim()
+            .replace(BLANK_REGEX, " ").trim()
         CLog.d(TAG) { "[AlipayNotify] parse: 文本 → ${normalized.take(80)}" }
 
         // ── 金额提取 ──
@@ -117,10 +123,6 @@ object AlipayNotificationExtractor  {
         // ── 商户提取 ──
         val merchant = extractMerchant(normalized)
         CLog.d(TAG) {
-            "[AlipayNotify] 商户提取 → merchant=${merchant ?: "无"}"
-        }
-
-        CLog.w(TAG) {
             "[AlipayNotify] 商户提取 → merchant=${merchant ?: "无"}"
         }
         return ParsedBill(

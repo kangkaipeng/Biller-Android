@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    关于 BottomSheet 布局 (v4.1)
+    关于 BottomSheet 布局 (v4.2)
     模块: feature/biller/ui/about
     功能: 应用信息 + 隐私权限说明 + 保活指南占位
+    改动: 应用 header 区域、权限项卡片化、保活占位美化、整体层级优化
 -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -15,104 +17,303 @@
         android:orientation="vertical"
         android:padding="24dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="关于"
-            android:textAppearance="?attr/textAppearanceHeadlineSmall"
-            android:textColor="?attr/colorOnSurface"
-            android:layout_marginBottom="16dp" />
-
-        <!-- 应用信息 -->
-        <TextView
+        <!-- ═══════ 应用 Header ═══════ -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="自动记账 v1.0\n基于通知+无障碍的双引擎自动化记账工具"
-            android:textAppearance="?attr/textAppearanceBodyMedium"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            android:lineSpacingExtra="4dp"
-            android:layout_marginBottom="16dp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="24dp">
 
-        <View android:layout_width="match_parent" android:layout_height="0.5dp"
-            android:background="?attr/colorOutlineVariant" android:layout_marginBottom="16dp" />
+            <!-- App 图标占位（替换为你的真实 icon） -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="?attr/colorSecondaryContainer">
 
-        <!-- 隐私权限说明 -->
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@mipmap/ic_launcher"
+                    android:scaleType="centerCrop" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="14dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/app_name"
+                    android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                    android:textColor="?attr/colorOnSurface" />
+
+                <TextView
+                    android:id="@+id/tv_version_about"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="v0.1.0"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:layout_marginTop="2dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="通知 + 无障碍双引擎自动记账"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:layout_marginTop="1dp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- ═══════ 隐私权限说明 ═══════ -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="🔒 隐私权限说明"
+            android:text="🔒  隐私权限说明"
             android:textAppearance="?attr/textAppearanceTitleSmall"
             android:textColor="?attr/colorOnSurface"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="10dp" />
 
-        <!-- 通知监听权限 -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="📋 通知监听权限 (BIND_NOTIFICATION_LISTENER_SERVICE)"
-            android:textAppearance="?attr/textAppearanceLabelLarge"
-            android:textColor="?attr/colorOnSurface"
-            android:layout_marginBottom="4dp" />
-        <TextView
+        <!-- 权限项：通知监听 -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="用于监听微信和支付宝的支付通知，自动提取交易金额和商户信息。当您完成支付后，通知栏会收到交易提醒，本应用通过解析该通知记录您的消费。"
-            android:textAppearance="?attr/textAppearanceBodySmall"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            android:lineSpacingExtra="2dp"
-            android:layout_marginBottom="12dp" />
+            android:layout_marginBottom="8dp"
+            app:cardElevation="0dp"
+            app:cardCornerRadius="10dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+            app:contentPadding="14dp">
 
-        <!-- 无障碍服务权限 -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="♿ 无障碍服务权限 (BIND_ACCESSIBILITY_SERVICE)"
-            android:textAppearance="?attr/textAppearanceLabelLarge"
-            android:textColor="?attr/colorOnSurface"
-            android:layout_marginBottom="4dp" />
-        <TextView
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="6dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📋"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="通知监听"
+                        android:textAppearance="?attr/textAppearanceLabelLarge"
+                        android:textColor="?attr/colorOnSurface" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="BIND_NOTIFICATION_LISTENER_SERVICE"
+                        android:textSize="9sp"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:maxLines="1"
+                        android:ellipsize="end" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="用于监听微信和支付宝的支付通知，自动提取交易金额和商户信息。当您完成支付后，通知栏会收到交易提醒，本应用通过解析该通知记录您的消费。"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:lineSpacingExtra="2dp" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 权限项：无障碍服务 -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="用于读取支付成功页面的界面内容，获取通知中缺失的商户名称、支付方式、原价和优惠信息等详细字段。该权限仅读取支付成功页面的界面文本内容，不执行任何自动操作。"
-            android:textAppearance="?attr/textAppearanceBodySmall"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            android:lineSpacingExtra="2dp"
-            android:layout_marginBottom="12dp" />
+            android:layout_marginBottom="8dp"
+            app:cardElevation="0dp"
+            app:cardCornerRadius="10dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+            app:contentPadding="14dp">
 
-        <!-- 通知发送权限 -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="🔔 通知发送权限 (POST_NOTIFICATIONS, Android 13+)"
-            android:textAppearance="?attr/textAppearanceLabelLarge"
-            android:textColor="?attr/colorOnSurface"
-            android:layout_marginBottom="4dp" />
-        <TextView
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="6dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="♿"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="无障碍服务"
+                        android:textAppearance="?attr/textAppearanceLabelLarge"
+                        android:textColor="?attr/colorOnSurface" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="BIND_ACCESSIBILITY_SERVICE"
+                        android:textSize="9sp"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:maxLines="1"
+                        android:ellipsize="end" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="用于读取支付成功页面的界面内容，获取通知中缺失的商户名称、支付方式、原价和优惠信息等详细字段。该权限仅读取支付成功页面的界面文本内容，不执行任何自动操作。"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:lineSpacingExtra="2dp" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 权限项：通知发送 -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="用于在账单捕获成功时向您发送本地通知提醒。仅在 Android 13 及以上版本需要单独申请，您可以在系统设置中管理此权限。"
-            android:textAppearance="?attr/textAppearanceBodySmall"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            android:lineSpacingExtra="2dp"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="20dp"
+            app:cardElevation="0dp"
+            app:cardCornerRadius="10dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
+            app:contentPadding="14dp">
 
-        <View android:layout_width="match_parent" android:layout_height="0.5dp"
-            android:background="?attr/colorOutlineVariant" android:layout_marginBottom="16dp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-        <!-- 保活指南 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="6dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🔔"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="通知发送"
+                        android:textAppearance="?attr/textAppearanceLabelLarge"
+                        android:textColor="?attr/colorOnSurface" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="POST_NOTIFICATIONS · Android 13+"
+                        android:textSize="9sp"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:maxLines="1"
+                        android:ellipsize="end" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="用于在账单捕获成功时向您发送本地通知提醒。仅在 Android 13 及以上版本需要单独申请，您可以在系统设置中管理此权限。"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:lineSpacingExtra="2dp" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ═══════ 后台保活指南（占位状态） ═══════ -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="⚡ 后台保活指南"
+            android:text="⚡  后台保活指南"
             android:textAppearance="?attr/textAppearanceTitleSmall"
             android:textColor="?attr/colorOnSurface"
-            android:layout_marginBottom="4dp" />
-        <TextView
+            android:layout_marginBottom="10dp" />
+
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="内容完善中，敬请期待..."
-            android:textAppearance="?attr/textAppearanceBodyMedium"
-            android:textColor="?attr/colorOutline" />
+            app:cardElevation="0dp"
+            app:cardCornerRadius="10dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerLowest"
+            app:strokeColor="?attr/colorOutlineVariant"
+            app:strokeWidth="1dp"
+            app:contentPadding="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🚧"
+                    android:textSize="28sp"
+                    android:gravity="center"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="内容完善中"
+                    android:textAppearance="?attr/textAppearanceLabelLarge"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:gravity="center"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="将涵盖各品牌手机的后台限制解除方法"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOutline"
+                    android:gravity="center" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
 </ScrollView>

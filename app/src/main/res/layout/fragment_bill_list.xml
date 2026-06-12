@@ -102,7 +102,7 @@
 
     </LinearLayout>
 
-    <!-- ═══════════ 渠道筛选行 (v5.1) — 标签 + Chip PopupMenu ═══════════ -->
+    <!-- ═══════════ 渠道筛选行 — 标签 + Chip PopupMenu ═══════════ -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="36dp"
@@ -145,9 +145,7 @@
             android:orientation="horizontal"
             android:clickable="true"
             android:focusable="true"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:paddingHorizontal="8dp"
-            android:paddingVertical="4dp">
+            android:background="?attr/selectableItemBackgroundBorderless">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_search_toggle"
@@ -158,6 +156,7 @@
                 android:clickable="false"
                 app:icon="@android:drawable/ic_menu_search"
                 app:iconSize="18dp"
+                android:gravity="center"
                 app:cornerRadius="16dp" />
 
             <!-- 搜索关键词缩略（默认隐藏） -->

@@ -181,61 +181,13 @@ class BillListFragment : Fragment() {
     private var lastBuiltFilterCategoryId: Long? = null
 
     /**
-     * 动态构建分类筛选 Chip (v5.1 — v5.2 详细注释)
+     * 动态构建分类筛选 Chip
      *
-     * 从 [BillListUiState.categories] 动态生成 [com.google.android.material.chip.Chip]，
-     * 以代码方式添加到 [ChipGroup] 中。"全部" Chip 固定在索引 0 位置，
-     * 后续按 categories 列表顺序依次排列。
+     * 从 categories 动态生成 Chip 添加到 ChipGroup。"全部" Chip 固定在索引 0。
+     * checked 状态通过 `post {}` 推迟到 layout pass 后设置，避免被 ChipGroup 重置。
+     * 分类数量有限（5~20），全量 removeAllViews + 重建开销可忽略（< 1ms）。
      *
-     * ## 设计决策与注意事项
-     *
-     * ### 1. 为什么不用 XML inflate 或用 RecyclerView？
-     *
-     *   分类数量通常在 5~20 个，属于小型集合。代码构建 Chip 避免了额外的
-     *   layout XML 文件和 ViewBinding 类，减少 apk 体积和维护成本。
-     *   RecyclerView + HorizontalScrollView 嵌套会产生手势冲突，
-     *   而 ChipGroup 是 Material Design 对此场景的标准容器。
-     *
-     * ### 2. 为什么用 "全量 removeAllViews + 重建" 而非增量更新？
-     *
-     *   - ChipGroup 没有类似 RecyclerView.Adapter 的 notifyItemChanged() API
-     *   - 对 5~20 个 Chip 做全量 remove + add 的性能开销在 1ms 以内（实测）
-     *   - 增量 diff + 逐个 remove/add 的代码复杂度远超性能收益
-     *   - 缓存守卫（early return）已确保仅在数据内容变化时才重建
-     *
-     * ### 3. 为什么 checked 状态的同步用 `group.post {}`？
-     *
-     *   ChipGroup 内部维护子 Chip 的 checked 互斥逻辑，该逻辑依赖于 Chip 的
-     *   layout 状态（需要 measure/layout pass 完成后 onCheckedChanged 回调
-     *   才能正确触发）。直接在 addView 后同步设置 isChecked 会导致:
-     *     - Chip 可能尚未完成布局 → checked 状态被 layout pass 重置
-     *     - ChipGroup 的选中互斥跟踪状态与实际 View 状态不一致
-     *
-     *   因此通过 `View.post(Runnable)` 将 isChecked 设置推迟到**当前消息队列
-     *   中所有 layout/draw 操作完成之后**执行，保证 Chip 已完全就绪。
-     *
-     *   <aside>
-     *   更现代化的方案是使用 `View.doOnLayout {}`（androidx.core-ktx），
-     *   它比 `post {}` 语义更精确——只在 layout 完成后执行而非整个消息队列之后。
-     *   当前使用 `post {}` 是保守选择，也足以覆盖 99.9% 的场景。
-     *   </aside>
-     *
-     * ### 4. "全部" Chip 的 categoryId 语义
-     *
-     *   点击"全部" Chip 时发射 `SelectCategory(null)`。
-     *   null 在 ViewModel 中表示"不做分类筛选，展示全部记录"。
-     *   因此 checked 判定条件为 `filterCategoryId == null`。
-     *
-     * ### 5. 子 Chip 索引偏移 `idx + 1`
-     *
-     *   ChipGroup 的子 View 按添加顺序排列:
-     *     - index 0: "全部" Chip（固定的第一个）
-     *     - index 1..N: categories 列表对应的分类 Chip
-     *
-     *   因此遍历 `categories.forEachIndexed` 时，需用 `idx + 1` 定位。
-     *
-     * @param state 当前 UI 状态快照，从中读取 [BillListUiState.categories]
-     *              和 [BillListUiState.filterCategoryId]
+     * @param state 当前 UI 状态，读取 categories 和 filterCategoryId
      */
     private fun buildCategoryChips(state: BillListUiState) {
         // 提取当前分类 ID 有序列表，用于与缓存做差异判定
