@@ -20,17 +20,25 @@ object AccessibilityTreeDumper {
     private const val MAX_TEXT_LEN = 80
 
     /**
+     * 将 rootNode 的整棵子树返回为字符串，供外部保存或分析。
+     * 供 [com.bjbyhd.screenreader_huawei.biller.diagnostic.ParseFailureDumper] 调用。
+     */
+    fun dumpToString(root: AccessibilityNodeInfo): String {
+        val sb = StringBuilder()
+        sb.appendLine("══════ Accessibility Tree Dump ══════")
+        dumpNode(root, sb, depth = 0)
+        sb.append("══════ End of Tree Dump ══════")
+        return sb.toString()
+    }
+
+    /**
      * 将 rootNode 的整棵子树输出到日志
      *
      * @param root 根节点（不会被 recycle）
      * @param tag  CLog 标签
      */
     fun dump(root: AccessibilityNodeInfo, tag: String) {
-        val sb = StringBuilder()
-        sb.appendLine("══════ Accessibility Tree Dump ══════")
-        dumpNode(root, sb, depth = 0)
-        sb.append("══════ End of Tree Dump ══════")
-        CLog.i(tag) { sb.toString() }
+        CLog.i(tag) { dumpToString(root) }
     }
 
     private fun dumpNode(node: AccessibilityNodeInfo, sb: StringBuilder, depth: Int) {

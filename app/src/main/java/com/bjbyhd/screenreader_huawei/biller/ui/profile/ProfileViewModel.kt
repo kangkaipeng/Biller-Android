@@ -68,6 +68,7 @@ class ProfileViewModel(
             is ProfileEvent.ExportLogs                -> onExportLogs()
             is ProfileEvent.ClearLogs                 -> onClearLogs()
             is ProfileEvent.ClearError                -> updateState { copy(errorMessage = null) }
+            is ProfileEvent.ExportDiagnostic        -> onExportDiagnostic()
         }
     }
 
@@ -561,5 +562,22 @@ class ProfileViewModel(
                 }
             }
         }
+    }
+
+    // ═══════════ 导出诊断日志 ═══════════
+
+    /** 分享诊断日志文件 — 通过 FileProvider 生成 content:// URI */
+    private fun onExportDiagnostic() {
+        val file = com.bjbyhd.screenreader_huawei.biller.diagnostic.ParseFailureDumper.getFile()
+        if (file == null) {
+            updateState { copy(errorMessage = "暂无诊断日志，解析失败的支付页会自动记录") }
+            return
+        }
+        val uri = androidx.core.content.FileProvider.getUriForFile(
+            appContext,
+            "${appContext.packageName}.fileprovider",
+            file,
+        )
+        sendEffect(ProfileEffect.ShareDiagnostic(uri, file.name))
     }
 }

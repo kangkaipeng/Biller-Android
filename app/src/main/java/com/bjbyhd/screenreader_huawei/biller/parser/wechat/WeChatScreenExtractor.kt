@@ -2,6 +2,8 @@ package com.bjbyhd.screenreader_huawei.biller.parser.wechat
 
 import android.view.accessibility.AccessibilityNodeInfo
 import com.bjbyhd.screenreader_huawei.biller.config.TargetConfig
+import com.bjbyhd.screenreader_huawei.biller.diagnostic.ParseFailureDumper
+import com.bjbyhd.screenreader_huawei.biller.parser.AccessibilityTreeDumper
 import com.bjbyhd.screenreader_huawei.biller.parser.ParsedBill
 import com.bjbyhd.screenreader_huawei.logger.api.CLog
 
@@ -63,6 +65,12 @@ object WeChatScreenExtractor {
         val amountIdx = texts.indexOfFirst { AMOUNT_REGEX.matches(it) }
         if (amountIdx <= 0) {
             CLog.w(TAG) { "[WeChat] 未找到金额项 texts=${texts.joinToString(" | ")}" }
+            ParseFailureDumper.dump(
+                extractor = "WeChat",
+                texts = texts,
+                reason = "支付成功页未找到金额正则匹配项 (¥/￥ 符号 + 两位小数)",
+                treeDump = AccessibilityTreeDumper.dumpToString(rootNode)
+            )
             return null
         }
         val amountText = texts[amountIdx]
@@ -71,13 +79,22 @@ object WeChatScreenExtractor {
         val merchant = texts[amountIdx - 1]
 
         // 类型判定: 商户含 "确认收款" → 转账
-        return if (merchant.contains(TRANSFER_MARKER)) {
+        val result = if (merchant.contains(TRANSFER_MARKER)) {
             CLog.i(TAG) { "[WeChat] 判定为 → 转账页" }
             extractTransfer(merchant, amountText, receivedAt)
         } else {
             CLog.i(TAG) { "[WeChat] 判定为 → 付款页" }
             extractPayment(merchant, amountText, receivedAt)
         }
+        if (result == null) {
+            ParseFailureDumper.dump(
+                extractor = "WeChat",
+                texts = texts,
+                reason = "金额文本匹配成功但 toDouble 转换失败: amountText=$amountText",
+                treeDump = AccessibilityTreeDumper.dumpToString(rootNode)
+            )
+        }
+        return result
     }
 
     // ═══════════════════════════════════════════════════

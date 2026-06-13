@@ -281,6 +281,25 @@
                     android:layout_height="0.5dp"
                     android:background="?attr/colorOutlineVariant" />
 
+                <!-- 诊断日志导出 — 分享 parse_failures.log 文件，用于分析解析失败的支付页 -->
+                <TextView
+                    android:id="@+id/btn_export_diagnostic"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:text="📊 导出诊断日志"
+                    android:textAppearance="?attr/textAppearanceBodyLarge"
+                    android:textColor="?attr/colorOnSurface"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:background="@null" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:background="?attr/colorOutlineVariant" />
+
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">

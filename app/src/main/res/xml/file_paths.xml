@@ -11,4 +11,6 @@
     <cache-path name="export" path="/" />
     <!-- v5.2: 日志文件导出 — 覆盖 filesDir/logs/ 下的 .log 和 .zip 文件 -->
     <files-path name="logs" path="logs/" />
+    <!-- 诊断日志导出 — 覆盖 filesDir/diagnostic/ 下的 .log 文件 -->
+    <files-path name="diagnostic" path="diagnostic/" />
 </paths>

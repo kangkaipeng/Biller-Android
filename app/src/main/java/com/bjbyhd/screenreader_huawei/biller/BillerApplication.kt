@@ -6,6 +6,7 @@ import com.bjbyhd.screenreader_huawei.biller.callback.NotificationChannels
 import com.bjbyhd.screenreader_huawei.biller.data.BillRepository
 import com.bjbyhd.screenreader_huawei.biller.data.BillerDatabase
 import com.bjbyhd.screenreader_huawei.biller.data.category.Category
+import com.bjbyhd.screenreader_huawei.biller.diagnostic.ParseFailureDumper
 import com.bjbyhd.screenreader_huawei.biller.pipeline.BillProcessingPipeline
 import com.bjbyhd.screenreader_huawei.biller.service.BillEventProcessor
 import com.bjbyhd.screenreader_huawei.biller.service.NotificationLogger
@@ -48,6 +49,7 @@ class BillerApplication : Application() {
         BillProcessingPipeline.init(this)
         BillEventProcessor.init(appScope)
         CaptureNotifier.init(this)
+        ParseFailureDumper.init(this)
 
         insertDefaultCategoriesIfNeeded()
     }

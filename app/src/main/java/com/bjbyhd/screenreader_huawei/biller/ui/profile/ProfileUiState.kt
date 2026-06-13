@@ -80,6 +80,8 @@ sealed interface ProfileEvent {
     data object ClearLogs : ProfileEvent
     /** 清除错误消息（Snackbar 展示后调用） */
     data object ClearError : ProfileEvent
+    /** 导出诊断日志 — 分享 parse_failures.log 文件 */
+    data object ExportDiagnostic : ProfileEvent
 }
 
 /**
@@ -94,4 +96,6 @@ sealed interface ProfileEffect {
     data class ShareLogs(val uri: android.net.Uri, val fileName: String) : ProfileEffect
     /** 打开系统文件选择器选择 CSV 文件 (v5.3) */
     data object LaunchFilePicker : ProfileEffect
+    /** 分享诊断日志文件的 content:// URI */
+    data class ShareDiagnostic(val uri: android.net.Uri, val fileName: String) : ProfileEffect
 }

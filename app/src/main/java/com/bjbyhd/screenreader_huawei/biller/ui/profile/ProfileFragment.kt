@@ -101,6 +101,9 @@ class ProfileFragment : Fragment() {
             btnClearLogs.setOnClickListener {
                 viewModel.onEvent(ProfileEvent.ClearLogs)
             }
+            btnExportDiagnostic.setOnClickListener {
+                viewModel.onEvent(ProfileEvent.ExportDiagnostic)
+            }
         }
     }
 
@@ -220,6 +223,18 @@ class ProfileFragment : Fragment() {
                                 }
                                 startActivity(
                                     Intent.createChooser(shareIntent, "分享日志文件")
+                                )
+                            }
+                            // 分享诊断日志文件
+                            is ProfileEffect.ShareDiagnostic -> {
+                                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                    type = "text/plain"
+                                    putExtra(Intent.EXTRA_STREAM, effect.uri)
+                                    putExtra(Intent.EXTRA_SUBJECT, "诊断日志导出 - ${effect.fileName}")
+                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                }
+                                startActivity(
+                                    Intent.createChooser(shareIntent, "分享诊断日志")
                                 )
                             }
                         }
