@@ -12,4 +12,6 @@ local.properties
 # Project-specific
 /temp/
 /logger/build/
+/app/release/
+/docs/
 *.txt

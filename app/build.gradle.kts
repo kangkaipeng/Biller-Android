@@ -45,6 +45,8 @@ dependencies {
     // Project modules
     implementation(project(":logger"))
 
+    debugImplementation(libs.leakcanary.android)
+
     // AndroidX
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)

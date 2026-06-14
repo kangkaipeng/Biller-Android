@@ -47,9 +47,9 @@ class BillerApplication : Application() {
         NotificationLogger.init(this)
         BillRepository.init(this)
         BillProcessingPipeline.init(this)
-        BillEventProcessor.init(appScope)
+        BillEventProcessor.init(appScope, this)
         CaptureNotifier.init(this)
-        ParseFailureDumper.init(this)
+        ParseFailureDumper.init(this, appScope)
 
         insertDefaultCategoriesIfNeeded()
     }

@@ -541,6 +541,12 @@ class BillEditDialog : BottomSheetDialogFragment() {
         super.onDestroyView()
         binding.root.removeCallbacks(null)
         _binding = null
+        // 确保 BottomSheetDialog dismiss — 释放 Dialog 内部 ContentObserver 对 View 树的引用。
+        // android.app.Dialog 构造时注册 ContentObserver 监听配置变化，仅当 Dialog dismiss
+        // 时才取消注册。若 Fragment view 销毁但 Dialog 未 dismiss，Observer 仍持有引用链:
+        //   ContentObserver → Dialog → FrameLayout(design_bottom_sheet) → ScrollView
+        // 导致 ~225 kB 泄漏。dismissAllowingStateLoss 在已 dismiss 时是空操作。
+        dismissAllowingStateLoss()
     }
 
     /**

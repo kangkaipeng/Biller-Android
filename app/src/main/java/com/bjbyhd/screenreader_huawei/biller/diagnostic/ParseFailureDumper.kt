@@ -2,6 +2,10 @@ package com.bjbyhd.screenreader_huawei.biller.diagnostic
 
 import android.content.Context
 import com.bjbyhd.screenreader_huawei.logger.api.CLog
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.io.File
 import java.io.FileWriter
 import java.text.SimpleDateFormat
@@ -15,6 +19,11 @@ import java.util.Locale
  *   - 当支付结果页门禁通过但后续解析失败时，将 texts 列表 + 完整树 dump 写入诊断文件
  *   - 文件位于 [filesDir/diagnostic/parse_failures.log]，不混入 CLog 日志目录
  *   - Profile 页提供导出入口，用户可通过系统分享面板导出文件
+ *
+ * 线程安全:
+ *   - 时间戳 + 计数器在调用线程（可能是主线程）中捕获，保证顺序正确
+ *   - 文件 I/O 通过 [scope] 调度到 Dispatchers.IO，不阻塞主线程
+ *   - [writeMutex] 串行化写入，防止并发 dump 导致行交错
  *
  * 初始化: [BillerApplication.onCreate] 中调用 [init]
  *
@@ -51,7 +60,14 @@ object ParseFailureDumper {
     /** 计数器 — 每次 init 或清空文件后重置 */
     private var counter = 0
 
-    fun init(context: Context) {
+    /** 协程调度器 — 初始化时注入，用于将文件 I/O 调度到后台线程 */
+    private var scope: CoroutineScope? = null
+
+    /** 写入互斥锁 — 防止并发 dump 导致行交错 */
+    private val writeMutex = Mutex()
+
+    fun init(context: Context, scope: CoroutineScope) {
+        this.scope = scope
         val dir = File(context.filesDir, DIAG_DIR)
         if (!dir.exists()) dir.mkdirs()
         dumpFile = File(dir, DIAG_FILE)
@@ -65,6 +81,9 @@ object ParseFailureDumper {
     /**
      * 写入一条解析失败诊断记录。
      *
+     * **保证调用线程不阻塞**: 时间戳与计数器在调用线程捕获后，
+     * 文件 I/O 通过 [scope] 调度到后台线程执行。
+     *
      * @param extractor 解析器标识: "Alipay" / "WeChat"
      * @param texts     DFS 收集到的全量文本列表
      * @param reason    失败原因，会显示在条目标题中
@@ -77,14 +96,47 @@ object ParseFailureDumper {
             return
         }
 
+        // ── 在调用线程捕获串行信息 ──
         counter++
+        val seqNo = counter
         val now = timeFormat.format(Date())
 
+        val s = scope
+        if (s == null) {
+            // scope 未注入时的 fallback: 同步写入 + warning
+            CLog.w(TAG) { "scope 未初始化，fallback 同步写入 #$seqNo" }
+            writeToFile(file, seqNo, now, extractor, texts, reason, treeDump)
+            return
+        }
+
+        s.launch {
+            writeMutex.withLock {
+                writeToFile(file, seqNo, now, extractor, texts, reason, treeDump)
+            }
+        }
+    }
+
+    /**
+     * 实际执行文件写入（在 Mutex 保护下串行调用）。
+     *
+     * @param file      目标文件
+     * @param seqNo     预分配的序号
+     * @param timestamp 预格式化的时间戳
+     */
+    private fun writeToFile(
+        file: File,
+        seqNo: Int,
+        timestamp: String,
+        extractor: String,
+        texts: List<String>,
+        reason: String,
+        treeDump: String,
+    ) {
         try {
             FileWriter(file, true).use { writer ->
                 // ═══ 头区 ═══
                 writer.appendLine("═══════════════════════════════════════════════════════════════")
-                writer.append("  Parse Failure #$counter  ·  $now  ·  $extractor")
+                writer.append("  Parse Failure #$seqNo  ·  $timestamp  ·  $extractor")
                 writer.appendLine()
                 writer.appendLine("  Reason: $reason")
                 writer.appendLine("═══════════════════════════════════════════════════════════════")
@@ -107,10 +159,9 @@ object ParseFailureDumper {
                 writer.appendLine()
             }
 
-            CLog.i(TAG) { "诊断记录已写入 #$counter: $reason" }
+            CLog.i(TAG) { "诊断记录已写入 #$seqNo: $reason" }
         } catch (e: Exception) {
-            CLog.e(TAG, e) { "诊断记录写入失败: ${e.message}" }
-            counter-- // 写入失败回退计数
+            CLog.e(TAG, e) { "诊断记录写入失败 #$seqNo: ${e.message}" }
         }
     }
 

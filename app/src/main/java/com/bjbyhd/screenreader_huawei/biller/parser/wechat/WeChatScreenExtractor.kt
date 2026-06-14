@@ -1,9 +1,6 @@
 package com.bjbyhd.screenreader_huawei.biller.parser.wechat
 
-import android.view.accessibility.AccessibilityNodeInfo
 import com.bjbyhd.screenreader_huawei.biller.config.TargetConfig
-import com.bjbyhd.screenreader_huawei.biller.diagnostic.ParseFailureDumper
-import com.bjbyhd.screenreader_huawei.biller.parser.AccessibilityTreeDumper
 import com.bjbyhd.screenreader_huawei.biller.parser.ParsedBill
 import com.bjbyhd.screenreader_huawei.logger.api.CLog
 
@@ -14,11 +11,12 @@ import com.bjbyhd.screenreader_huawei.logger.api.CLog
  *
  * ## 算法
  *
- *   1. DFS 遍历整棵树 → 收集所有节点的 text + contentDescription
- *   2. 门禁校验: texts.first() == "支付成功" && texts.last() in [完成, 返回商家, ...]
- *   3. 金额定位: 在所有 texts 中匹配 ¥/￥ + 数字 → 金额项
- *   4. 商户定位: 金额项的前一个文本 → 商户
- *   5. 类型判定: 商户含 "确认收款" → 转账；否则 → 付款
+ *   1. 门禁校验: texts.first() == "支付成功" && texts.last() in [完成, 返回商家, ...]
+ *   2. 金额定位: 在所有 texts 中匹配 ¥/￥ + 数字 → 金额项
+ *   3. 商户定位: 金额项的前一个文本 → 商户
+ *   4. 类型判定: 商户含 "确认收款" → 转账；否则 → 付款
+ *
+ * texts 由 [BillEventProcessor.collectTexts] 统一收集后传入，本类不访问无障碍树。
  *
  * ## 实测数据
  *
@@ -40,87 +38,51 @@ object WeChatScreenExtractor {
     private val AMOUNT_REGEX = Regex("[¥￥](\\d+\\.\\d{2})")
     private val TRANSFER_MERCHANT_REGEX = Regex("待(.+)确认收款")
 
-    private const val MAX_DEPTH = 80
-
     // ═══════════════════════════════════════════════════
     // 公开入口
     // ═══════════════════════════════════════════════════
 
-    fun parse(rootNode: AccessibilityNodeInfo, receivedAt: Long): ParsedBill? {
-        val texts = collectTexts(rootNode)
-        CLog.i(TAG) { "[WeChat] 收集完成 — texts(${texts.size})=${texts.joinToString(" | ")}" }
+    /**
+     * 纯文本提取 — 接收已收集的 texts，不访问无障碍树。
+     *
+     * 供 [WeChatParser.handle] 调用。texts 由 [BillEventProcessor.collectTexts] 统一收集。
+     * 门禁检查保留为防御性编程；若门禁失败返回 null，调用方负责诊断记录。
+     *
+     * @param texts     DFS 收集的全量文本列表
+     * @param receivedAt 事件接收时间戳
+     * @return 提取成功返回 [ParsedBill]，门禁失败或金额提取失败返回 null
+     */
+    fun extract(texts: List<String>, receivedAt: Long): ParsedBill? {
+        CLog.i(TAG) { "[WeChat] extract — texts(${texts.size})=${texts.joinToString(" | ")}" }
 
+        // 防御性门禁校验
         if (texts.isEmpty()) {
             CLog.d(TAG) { "[WeChat] texts 为空 → 跳过" }
             return null
         }
-
-        // 门禁校验: 至少3项 + 首="支付成功" + 尾 ∈ [完成, 返回商家, ...]
         if (texts.size < 3 || texts.first() != GATE_FIRST || texts.last() !in GATE_LAST_SET) {
             CLog.d(TAG) { "[WeChat] 门禁未通过: first=${texts.first()} last=${texts.last()} → 非支付成功页" }
             return null
         }
 
-        // 金额定位: 在所有 texts 中匹配 ¥/￥ 正则
+        // 金额定位
         val amountIdx = texts.indexOfFirst { AMOUNT_REGEX.matches(it) }
         if (amountIdx <= 0) {
             CLog.w(TAG) { "[WeChat] 未找到金额项 texts=${texts.joinToString(" | ")}" }
-            ParseFailureDumper.dump(
-                extractor = "WeChat",
-                texts = texts,
-                reason = "支付成功页未找到金额正则匹配项 (¥/￥ 符号 + 两位小数)",
-                treeDump = AccessibilityTreeDumper.dumpToString(rootNode)
-            )
             return null
         }
         val amountText = texts[amountIdx]
 
-        // 商户定位: 金额项的前一个文本
+        // 商户定位
         val merchant = texts[amountIdx - 1]
 
-        // 类型判定: 商户含 "确认收款" → 转账
-        val result = if (merchant.contains(TRANSFER_MARKER)) {
+        // 类型判定 + 提取
+        return if (merchant.contains(TRANSFER_MARKER)) {
             CLog.i(TAG) { "[WeChat] 判定为 → 转账页" }
             extractTransfer(merchant, amountText, receivedAt)
         } else {
             CLog.i(TAG) { "[WeChat] 判定为 → 付款页" }
             extractPayment(merchant, amountText, receivedAt)
-        }
-        if (result == null) {
-            ParseFailureDumper.dump(
-                extractor = "WeChat",
-                texts = texts,
-                reason = "金额文本匹配成功但 toDouble 转换失败: amountText=$amountText",
-                treeDump = AccessibilityTreeDumper.dumpToString(rootNode)
-            )
-        }
-        return result
-    }
-
-    // ═══════════════════════════════════════════════════
-    // 文本收集: DFS，收集所有节点的 text + contentDescription
-    // ═══════════════════════════════════════════════════
-
-    private fun collectTexts(node: AccessibilityNodeInfo): List<String> {
-        val result = mutableListOf<String>()
-        collectRecursive(node, result, depth = 0)
-        return result
-    }
-
-    private fun collectRecursive(node: AccessibilityNodeInfo?, result: MutableList<String>, depth: Int) {
-        if (node == null || depth > MAX_DEPTH) return
-
-        node.text?.toString()?.trim()?.takeIf { it.isNotEmpty() }?.let { result.add(it) }
-        node.contentDescription?.toString()?.trim()?.takeIf { it.isNotEmpty() }?.let { result.add(it) }
-
-        for (i in 0 until node.childCount) {
-            var child: AccessibilityNodeInfo? = null
-            try {
-                child = node.getChild(i)
-                collectRecursive(child, result, depth + 1)
-            } finally {
-                child?.recycle()
-            }
         }
     }
 

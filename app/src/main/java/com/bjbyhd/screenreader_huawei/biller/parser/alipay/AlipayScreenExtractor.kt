@@ -1,16 +1,14 @@
 package com.bjbyhd.screenreader_huawei.biller.parser.alipay
 
-import android.view.accessibility.AccessibilityNodeInfo
 import com.bjbyhd.screenreader_huawei.biller.config.TargetConfig
-import com.bjbyhd.screenreader_huawei.biller.diagnostic.ParseFailureDumper
-import com.bjbyhd.screenreader_huawei.biller.parser.AccessibilityTreeDumper
 import com.bjbyhd.screenreader_huawei.biller.parser.ParsedBill
 import com.bjbyhd.screenreader_huawei.logger.api.CLog
 
 /**
  * 支付宝无障碍页面提取器
  *
- * 从支付宝 AccessibilityNodeInfo 树中提取支付/转账/优惠信息。
+ * 从 texts 列表（由 [BillEventProcessor.collectTexts] 统一收集）中提取支付/转账/优惠信息。
+ * 本类不访问无障碍树。
  *
  * ## 解析流程
  *
@@ -46,31 +44,32 @@ object AlipayScreenExtractor {
     /** 拆分格式裸 ¥ 搜索限域 — 仅在前 N 项中搜索，Body 区无裸 ¥ */
     private const val HEADER_SCAN_LIMIT = 5
 
-    private const val MAX_DEPTH = 80
-
     // ═══════════════════════════════════════════════════
     // 公开入口
     // ═══════════════════════════════════════════════════
 
     /**
-     * 入口 — DFS 收集文本后，依次执行: 门禁 → 金额提取 → 类型分流。
+     * 纯文本提取 — 接收已收集的 texts，不访问无障碍树。
      *
-     * 门禁用文本而非 ¥ 符号，防止余额页等含 ¥ 的非支付页误触发。
+     * 供 [AlipayParser.handle] 调用。texts 由 [BillEventProcessor.collectTexts] 统一收集。
+     * 门禁检查保留为防御性编程；若门禁失败返回 null。
+     *
+     * 预条件: 调用方应确保 texts[0] 以 "支付成功"/"转账成功" 开头且 "完成" in texts。
+     *         如果预条件不满足，本方法通过门禁检查安全返回 null。
+     *
+     * @param texts     DFS 收集的全量文本列表
+     * @param receivedAt 事件接收时间戳
+     * @return 提取成功返回 [ParsedBill]，门禁失败或金额提取失败返回 null
      */
-    fun parse(rootNode: AccessibilityNodeInfo, receivedAt: Long): ParsedBill? {
-        val texts = collectTexts(rootNode)
-        CLog.i(TAG) { "[Alipay] 收集完成 — texts(${texts.size})=${texts.joinToString(" | ")}" }
+    fun extract(texts: List<String>, receivedAt: Long): ParsedBill? {
+        CLog.i(TAG) { "[Alipay] extract — texts(${texts.size})=${texts.joinToString(" | ")}" }
 
-        // ══════════════════════════════════════════════
-        // Step 1: 门禁校验 — 文本内容，不依赖 ¥ 符号
-        // ══════════════════════════════════════════════
-
+        // 防御性门禁校验
         if (texts.size < 4) {
             CLog.d(TAG) { "[Alipay] texts 不足4项 → 跳过" }
             return null
         }
 
-        // 先判定页面类型再提取金额 — 防止余额页等含 ¥ 的非支付页误触发
         val isTransfer = texts.first().startsWith("转账成功")
         val isPayment = texts.first().startsWith("支付成功")
         if (!isPayment && !isTransfer) {
@@ -80,28 +79,13 @@ object AlipayScreenExtractor {
 
         if ("完成" !in texts) {
             CLog.d(TAG) { "[Alipay] 缺少'完成' → 可能未渲染完成" }
-            ParseFailureDumper.dump(
-                extractor = "Alipay",
-                texts = texts,
-                reason = "支付结果页缺少'完成'按钮，页面可能未渲染完整",
-                treeDump = AccessibilityTreeDumper.dumpToString(rootNode)
-            )
             return null
         }
 
-        // ══════════════════════════════════════════════
-        // Step 2: 实付金额 — 嵌入优先，拆分兜底
-        // ══════════════════════════════════════════════
-
+        // 实付金额提取
         val extractResult = extractPaidAmount(texts)
         if (extractResult == null) {
             CLog.w(TAG) { "[Alipay] 实付金额提取失败 → 跳过" }
-            ParseFailureDumper.dump(
-                extractor = "Alipay",
-                texts = texts,
-                reason = "实付金额提取失败 (L1嵌入格式与L2拆分格式均未命中)",
-                treeDump = AccessibilityTreeDumper.dumpToString(rootNode)
-            )
             return null
         }
         val (paidAmount, paidEndIdx) = extractResult
@@ -109,12 +93,6 @@ object AlipayScreenExtractor {
         CLog.i(TAG) {
             "[Alipay] 判定为 → ${if (isTransfer) "转账" else "付款"} paidAmount=$paidAmount"
         }
-
-        // ══════════════════════════════════════════════
-        // Step 3: 分流 — 支付与转账的 Body 结构不同
-        // ══════════════════════════════════════════════
-        // 支付页 Body 含 ¥ 值 (原价/优惠)，需 ¥ pair 扫描定位起点；
-        // 转账页 Body 仅纯文本键值对 (收款方/交易方式)，¥ 扫描不适用。
 
         return if (isTransfer) {
             parseTransfer(texts, paidAmount, paidEndIdx, receivedAt)
@@ -224,31 +202,6 @@ object AlipayScreenExtractor {
         val pairs = body.chunked(2).filter { it.size == 2 }.associate { it[0] to it[1] }
         CLog.i(TAG) { "[Alipay] 键值对: $pairs" }
         return extractTransfer(pairs, paidAmount, receivedAt)
-    }
-
-    // ═══════════════════════════════════════════════════
-    // 文本收集 — DFS 收集 text + contentDescription
-    // ═══════════════════════════════════════════════════
-
-    private fun collectTexts(node: AccessibilityNodeInfo): List<String> {
-        val result = mutableListOf<String>()
-        collectRecursive(node, result, depth = 0)
-        return result
-    }
-
-    private fun collectRecursive(node: AccessibilityNodeInfo?, result: MutableList<String>, depth: Int) {
-        if (node == null || depth > MAX_DEPTH) return
-        node.text?.toString()?.trim()?.takeIf { it.isNotEmpty() }?.let { result.add(it) }
-        node.contentDescription?.toString()?.trim()?.takeIf { it.isNotEmpty() }?.let { result.add(it) }
-        for (i in 0 until node.childCount) {
-            var child: AccessibilityNodeInfo? = null
-            try {
-                child = node.getChild(i)
-                collectRecursive(child, result, depth + 1)
-            } finally {
-                child?.recycle()
-            }
-        }
     }
 
     // ═══════════════════════════════════════════════════

@@ -2,6 +2,9 @@ package com.bjbyhd.screenreader_huawei.biller.parser.wechat
 
 import android.service.notification.StatusBarNotification
 import android.view.accessibility.AccessibilityNodeInfo
+import com.bjbyhd.screenreader_huawei.biller.diagnostic.ParseFailureDumper
+import com.bjbyhd.screenreader_huawei.biller.parser.AccessibilityTreeDumper
+import com.bjbyhd.screenreader_huawei.biller.parser.ParseResult
 import com.bjbyhd.screenreader_huawei.biller.parser.ParsedBill
 import com.bjbyhd.screenreader_huawei.logger.api.CLog
 
@@ -24,12 +27,50 @@ object WeChatParser {
      *
      * @return 解析成功返回 [ParsedBill]，页面不匹配或金额缺失返回 null
      */
-    fun parseAccessibility(rootNode: AccessibilityNodeInfo, receivedAt: Long): ParsedBill? {
-        CLog.i(TAG) { "[WeChat] parseAccessibility: 开始 → rootNode.className=${rootNode.className}" }
-//        AccessibilityTreeDumper.dump(rootNode, TAG)
-        val result = WeChatScreenExtractor.parse(rootNode, receivedAt)
-        CLog.i(TAG) { "[WeChat] parseAccessibility: 完成 → amount=${result?.amount} merchant=${result?.merchant}" }
-        return result
+    /**
+     * 微信统一无障碍入口 — 分类 + 提取 + 诊断。
+     *
+     * 供 [BillEventProcessor] 在 pkg-first 分发后调用。
+     * texts 已由 [BillEventProcessor.collectTexts] 收集，rootNode 仅用于失败诊断的树 dump。
+     *
+     * ## 流程
+     *   1. [WeChatPageClassifier.classify] 判定页面类型
+     *   2. PAYMENT → [WeChatScreenExtractor.extract] 单笔提取
+     *   3. 提取失败 → [ParseFailureDumper.dump] 记录 texts + 树
+     *   4. BILL_LIST → 预留 (P4)
+     *
+     * @param texts     DFS 收集的全量文本列表
+     * @param receivedAt 事件接收时间戳
+     * @param rootNode  无障碍根节点（仅用于失败诊断的树 dump，不会在此方法内 recycle）
+     * @return [ParseResult.SingleTransaction] / [ParseResult.TransactionList] / [ParseResult.NotTarget]
+     */
+    fun handle(
+        texts: List<String>,
+        receivedAt: Long,
+        rootNode: AccessibilityNodeInfo,
+    ): ParseResult {
+        return when (WeChatPageClassifier.classify(texts)) {
+            PageType.PAYMENT -> {
+                val result = WeChatScreenExtractor.extract(texts, receivedAt)
+                if (result != null) {
+                    ParseResult.SingleTransaction(result)
+                } else {
+                    // Classifier 判定为支付成功页但提取失败 → 诊断记录
+                    ParseFailureDumper.dump(
+                        extractor = "WeChat",
+                        texts = texts,
+                        reason = "支付成功页门禁通过但金额提取/转换失败",
+                        treeDump = AccessibilityTreeDumper.dumpToString(rootNode),
+                    )
+                    ParseResult.NotTarget
+                }
+            }
+            PageType.BILL_LIST -> {
+                // 预留: P4 账单列表提取
+                ParseResult.NotTarget
+            }
+            PageType.NOT_TARGET -> ParseResult.NotTarget
+        }
     }
 
     /**

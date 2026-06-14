@@ -55,7 +55,7 @@
 
         <!-- 悬浮窗服务（P2: 支付反馈悬浮窗） -->
         <service
-            android:name=".callback.FloatingOverlayService"
+            android:name=".overlay.FloatingOverlayService"
             android:exported="false" />
 
         <!-- FileProvider — CSV 导出 -->
